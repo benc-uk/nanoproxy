@@ -1,0 +1,15 @@
+upstreams:
+  - name: my-server-a
+    host: some.hostname.here
+    scheme: https
+  - name: my-server-b
+    host: backend.api.example
+    port: 3000
+
+rules:
+  - upstream: my-server-b
+    path: /api
+    stripPath: true
+  - upstream: my-server-a
+    path: /
+    host: proxy.example.net

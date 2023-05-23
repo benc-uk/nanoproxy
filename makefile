@@ -65,3 +65,4 @@ clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true
 	@rm -rf bin
 	@rm -rf .tools
+	@rm -rf tmp

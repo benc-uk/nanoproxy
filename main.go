@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"nanoproxy/pkg/proxy"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -29,6 +31,7 @@ type Rule struct {
 	Upstream  string `yaml:"upstream"`
 	MatchMode string `yaml:"matchMode"`
 	Host      string `yaml:"host"`
+	StripPath bool   `yaml:"stripPath"`
 }
 
 func main() {
@@ -37,58 +40,105 @@ func main() {
 		port = "8080"
 	}
 
-	data, err := os.ReadFile("config.yaml")
+	configPath := flag.String("config", "config.yaml", "Path to config file")
+	flag.Parse()
+
+	data, err := os.ReadFile(*configPath)
 	if err != nil {
-		log.Fatalf("config error: %v", err)
+		log.Fatalf("Config error: %v", err)
 	}
+
+	log.Println("Config loaded from: " + *configPath)
 
 	c := Config{}
+
 	err = yaml.Unmarshal([]byte(data), &c)
 	if err != nil {
-		log.Fatalf("config error: %v", err)
+		log.Fatalf("Config error: %v", err)
 	}
 
-	log.Printf("config: %+v", c)
+	if os.Getenv("DEBUG") != "" {
+		log.Printf("Config dump:\n %+v\n", c)
+	}
 
 	proxies := make(map[string]*httputil.ReverseProxy)
+
 	for _, u := range c.Upstreams {
-		p, err := proxy.New(u.Scheme + "://" + u.Host + ":" + strconv.Itoa(u.Port))
+		scheme := u.Scheme
+		if scheme == "" {
+			scheme = "http"
+		}
+
+		if u.Port == 0 {
+			u.Port = 80
+		}
+
+		proxy, err := proxy.New(scheme + "://" + u.Host + ":" + strconv.Itoa(u.Port))
 
 		if err != nil {
 			log.Fatalf("proxy error: %v", err)
 			continue
 		}
 
-		proxies[u.Name] = p
+		proxies[u.Name] = proxy
 	}
 
 	// All requests flow through this handler and are routed to the correct upstream
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Request received: " + r.URL.String())
+		if os.Getenv("DEBUG") != "" {
+			log.Println("Request received: " + r.URL.String())
+		}
+
+		// TODO: Optimise this for high volumes of requests and rules
 
 		// Find matching rule
 		for _, rule := range c.Rules {
 			matched := false
 
-			if rule.MatchMode != "prefix" && rule.MatchMode != "exact" {
-				log.Printf("Invalid match mode for rule host:%s path:%s", rule.Host, rule.Path)
+			if !(rule.MatchMode == "" || rule.MatchMode == "prefix" || rule.MatchMode == "exact") {
+				log.Printf("Invalid match mode found: %s", rule.MatchMode)
 				continue
 			}
 
-			// match on prefix
-			if rule.MatchMode == "prefix" && strings.HasPrefix(r.URL.Path, rule.Path) {
-				matched = true
+			// Strip port from host
+			hostname := r.Host
+			if strings.Contains(hostname, ":") {
+				hostname = strings.Split(hostname, ":")[0]
 			}
-			if rule.MatchMode == "exact" && r.URL.Path == rule.Path {
-				matched = true
+
+			if os.Getenv("DEBUG") != "" {
+				log.Printf("Checking rule host:%s path:%s - against host:%s path:%s",
+					rule.Host, rule.Path, hostname, r.URL.Path)
+			}
+
+			// Match on host first, empty host matches all
+			if rule.Host == "" || hostname == rule.Host {
+
+				// Match on prefix which is the default if not specified
+				if (rule.MatchMode == "prefix" || rule.MatchMode == "") && strings.HasPrefix(r.URL.Path, rule.Path) {
+					matched = true
+				}
+
+				if rule.MatchMode == "exact" && r.URL.Path == rule.Path {
+					matched = true
+				}
 			}
 
 			if matched {
-				// Find matching upstream
+				if os.Getenv("DEBUG") != "" {
+					log.Printf("Matched rule: %s_%s_%s", rule.Upstream, rule.Host, rule.Path)
+				}
+
+				// Find proxy named by the rule that was matched
 				p := proxies[rule.Upstream]
 				if p == nil {
-					log.Printf("Upstream '%s' not found", rule.Upstream)
+					log.Printf("Upstream '%s' not found in config", rule.Upstream)
 					continue
+				}
+
+				// Strip path
+				if rule.StripPath {
+					r.URL.Path = strings.Replace(r.URL.Path, rule.Path, "", 1)
 				}
 
 				p.ServeHTTP(w, r)
@@ -98,10 +148,20 @@ func main() {
 		}
 
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("No matching rule for host & path"))
-
+		_, _ = w.Write([]byte("No matching rule for host & path"))
 	})
 
+	server := &http.Server{
+		Addr:              ":" + port,
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+	}
+
 	log.Println("Starting proxy server on port: " + port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+
+	err = server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
 }
