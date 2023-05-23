@@ -6,7 +6,9 @@ tmp_dir = "tmp"
   cmd = "go build -o ./tmp/main ."
   exclude_dir = ["bin", "tmp"]
   include_dir = []
-  include_ext = ["go"]
+  include_ext = ["go", "yaml"]
+  delay = 500
+  kill_delay = 10
 
 [misc]
   clean_on_exit = false

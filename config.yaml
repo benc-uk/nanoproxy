@@ -1,0 +1,18 @@
+upstreams:
+  - name: fred
+    host: localhost
+    port: 8001
+    scheme: http
+  - name: barney
+    host: localhost
+    port: 8002
+    scheme: http
+
+rules:
+  - upstream: fred
+    path: /anything/foo
+    matchMode: prefix
+  - upstream: barney
+    path: /anything/bar
+    matchMode: exact
+    host: barney.com

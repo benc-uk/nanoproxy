@@ -14,7 +14,7 @@ const (
 
 // New takes target host URL and creates a reverse proxy
 func New(targetURL string) (*httputil.ReverseProxy, error) {
-	log.Printf("Initialzing proxy for upstream %v\n", targetURL)
+	log.Printf("Creating proxy with upstream URL: %v\n", targetURL)
 	incomingUrl, err := url.Parse(targetURL)
 	if err != nil {
 		return nil, err
