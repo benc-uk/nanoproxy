@@ -1,0 +1,14 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  bin = "./tmp/main"
+  cmd = "go build -o ./tmp/main ./ingress-ctrl"
+  exclude_dir = ["bin", "tmp", "build", "deploy"]
+  include_dir = []
+  include_ext = ["go"]
+  delay = 500
+  kill_delay = 10
+
+[misc]
+  clean_on_exit = true

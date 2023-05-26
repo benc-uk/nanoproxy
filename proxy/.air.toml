@@ -3,12 +3,12 @@ tmp_dir = "tmp"
 
 [build]
   bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ."
-  exclude_dir = ["bin", "tmp"]
+  cmd = "go build -o ./tmp/main ./proxy"
+  exclude_dir = ["bin", "tmp", "build", "deploy"]
   include_dir = []
   include_ext = ["go", "yaml"]
   delay = 500
   kill_delay = 10
 
 [misc]
-  clean_on_exit = false
+  clean_on_exit = true

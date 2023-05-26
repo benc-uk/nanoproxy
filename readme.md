@@ -55,3 +55,9 @@ rules:
 ```
 
 ## Routing and matching logic
+
+## Running as container
+
+```bash
+docker run -v $PWD:/etc ghcr.io/benc-uk/nanoproxy:latest ./proxy -c /etc/config.yaml
+```

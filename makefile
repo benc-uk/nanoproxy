@@ -40,26 +40,30 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
 	$(GOLINT_PATH) run --fix
 
-build: ## 🔨 Build all binaries into ./bin/ directory
+build: ## 🔨 Build binary into ./bin/ directory
 	@figlet $@ || true
 	@mkdir -p bin
 	@go build -o bin ./...
 
-image: ## 📦 Build all container images
+images: ## 📦 Build container images
 	@figlet $@ || true
-	docker compose -f build/compose.yaml build
+	docker build . -f build/Dockerfile.proxy -t $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG) --build-arg VERSION=$(VERSION)
 
-push: ## 📤 Push all container images
+push: ## 📤 Push container images
 	@figlet $@ || true
-	docker compose -f build/compose.yaml push
+	docker push $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG)
 
-run: ## 🎯 Run proxy locally with hot-reload
+run-proxy: ## 🎯 Run proxy locally with hot-reload
 	@figlet $@ || true
-	@$(AIR_PATH) -c .air.toml
+	@$(AIR_PATH) -c proxy/.air.toml
+
+run-ctrl: ## 🎯 Run controller locally with hot-reload
+	@figlet $@ || true
+	@$(AIR_PATH) -c ingress-ctrl/.air.toml
 
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true
-	@ALERT_SMTP_TO= go test -v ./... 
+	@echo "Not implemented yet"
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true

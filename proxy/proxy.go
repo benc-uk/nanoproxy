@@ -1,10 +1,17 @@
-package proxy
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoProxy reverse proxies (aka upstreams)
+// ----------------------------------------------------------------------------
+
+package main
 
 import (
 	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"time"
 )
 
 const (
@@ -13,8 +20,8 @@ const (
 )
 
 // New takes target host URL and creates a reverse proxy
-func New(targetURL string) (*httputil.ReverseProxy, error) {
-	log.Printf("Creating proxy with upstream URL: %v\n", targetURL)
+func NewProxy(targetURL string, timeout time.Duration) (*httputil.ReverseProxy, error) {
+	log.Printf("Creating upstream: %v\n", targetURL)
 
 	incomingURL, err := url.Parse(targetURL)
 	if err != nil {
@@ -22,6 +29,13 @@ func New(targetURL string) (*httputil.ReverseProxy, error) {
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(incomingURL)
+
+	// create Transport with timeout
+	proxy.Transport = &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout: timeout,
+		}).DialContext,
+	}
 
 	proxy.Director = nil
 	proxy.Rewrite = modifyRequest(incomingURL)
@@ -43,5 +57,8 @@ func modifyRequest(url *url.URL) func(*httputil.ProxyRequest) {
 		// Placeholder for future modifications
 		proxyReq.SetXForwarded()
 		proxyReq.SetURL(url)
+
+		// Preserve the original host header
+		proxyReq.Out.Host = proxyReq.In.Host
 	}
 }
