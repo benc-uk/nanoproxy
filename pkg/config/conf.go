@@ -28,10 +28,11 @@ type Rule struct {
 	StripPath bool   `yaml:"stripPath"`
 }
 
-func Load() (*Config, error) {
+var configPath = "./config.yaml"
+
+func init() {
 	// Config file path can be set with -c or --config or CONF_FILE env var
 
-	configPath := "./config.yaml"
 	flag.StringVar(&configPath, "config", "./config.yaml", "Path to config file")
 	flag.StringVar(&configPath, "c", "./config.yaml", "Path to config file")
 	flag.Parse()
@@ -40,7 +41,9 @@ func Load() (*Config, error) {
 	if confPathEnv != "" {
 		configPath = confPathEnv
 	}
+}
 
+func Load() (*Config, error) {
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Printf("Config error: %v", err)
@@ -66,20 +69,16 @@ func Load() (*Config, error) {
 }
 
 // Write the config to a file
-func (c Config) Write() {
-	configPath := "./config.yaml"
-	confPathEnv := os.Getenv("CONF_FILE")
-	if confPathEnv != "" {
-		configPath = confPathEnv
-	}
-
+func (c Config) Write() error {
 	d, err := yaml.Marshal(&c)
 	if err != nil {
-		log.Fatalf("Config error: %v", err)
+		return err
 	}
 
 	err = os.WriteFile(configPath, d, 0644)
 	if err != nil {
-		log.Fatalf("Config error: %v", err)
+		return err
 	}
+
+	return nil
 }

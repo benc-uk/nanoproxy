@@ -10,13 +10,17 @@ import (
 	"strconv"
 
 	"github.com/benc-uk/nanoproxy/pkg/config"
+	"github.com/go-logr/logr"
 	netv1 "k8s.io/api/networking/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 )
+
+// Fixed name
+const ingressClassControllerName = "benc-uk/nanoproxy"
 
 // IngressReconciler reconciles a Ingress object
 type IngressReconciler struct {
@@ -27,21 +31,26 @@ type IngressReconciler struct {
 var (
 	// A map of all ingresses we are watching
 	ingressCache = make(map[string]*netv1.Ingress)
+	logger       logr.Logger
 )
 
 // Reconcile is part of the main kubernetes reconciliation loop
 func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
+	logger = ctrllog.FromContext(ctx)
 
 	key := req.Namespace + ":" + req.Name
 
+	// Fetch ingress
 	var ingress netv1.Ingress
-	if err := r.Get(ctx, req.NamespacedName, &ingress); err != nil {
+	err := r.Get(ctx, req.NamespacedName, &ingress)
+	if err != nil {
 		if apierrors.IsNotFound(err) {
-			// Handle delete
-			log.Info("Ingress deleted", "key", key)
-			delete(ingressCache, key)
-			buildConfig()
+			if ingressCache[key] != nil {
+				// Handle delete
+				logger.Info("Ingress deleted", "key", key)
+				delete(ingressCache, key)
+				buildConfig()
+			}
 
 			return ctrl.Result{}, nil
 		}
@@ -49,8 +58,45 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	// Handle new / update
-	log.Info("Ingress updated or created", "key", key)
+	// Check ingress class
+	if ingress.Spec.IngressClassName == nil {
+		// TODO: Not sure if this is the right behavior, but it makes life easier
+		logger.Info("Ignoring due to missing ingressClassName", "key", key)
+
+		// If we were previously tracking this ingress, remove it
+		if ingressCache[key] != nil {
+			logger.Info("Ingress deleted", "key", key)
+			delete(ingressCache, key)
+			buildConfig()
+		}
+
+		return ctrl.Result{}, nil
+	}
+
+	// Fetch ingress classes matching the name in the spec
+	var ingressClass netv1.IngressClass
+	err = r.Get(ctx, client.ObjectKey{Name: *ingress.Spec.IngressClassName}, &ingressClass)
+	if err != nil {
+		logger.Error(err, "Failed to get ingress class", "key", key)
+
+		// If we were previously tracking this ingress, remove it
+		if ingressCache[key] != nil {
+			logger.Info("Ingress deleted", "key", key)
+			delete(ingressCache, key)
+			buildConfig()
+		}
+
+		return ctrl.Result{}, nil
+	}
+
+	// Finally check the controller name referenced in the IngressClass matches us
+	if ingressClass.Spec.Controller != ingressClassControllerName {
+		// Skip
+		return ctrl.Result{}, nil
+	}
+
+	// If we got here, we are tracking this ingress and should update our cache
+	logger.Info("Ingress updated or created", "key", key)
 	ingressCache[key] = &ingress
 	buildConfig()
 
@@ -108,7 +154,10 @@ func buildConfig() {
 	}
 
 	// We overwrite the config file each time, this is fine
-	conf.Write()
+	err := conf.Write()
+	if err != nil {
+		logger.Error(err, "Failed to write config file")
+	}
 }
 
 // Register controller for: networking v1 Ingress resources

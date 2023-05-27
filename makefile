@@ -43,7 +43,7 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 build: ## 🔨 Build binary into ./bin/ directory
 	@figlet $@ || true
 	@mkdir -p bin
-	@go build -o bin ./...
+	@go build -o bin/nanoproxy ./proxy
 
 images: ## 📦 Build container images
 	@figlet $@ || true
