@@ -1,20 +1,24 @@
 # NanoProxy
 
-This is simple HTTP reverse proxy written in Go and based largely on [httputil.ReverseProxy](https://pkg.go.dev/net/http/httputil#ReverseProxy) in the Go standard library
+NanoProxy is a simple HTTP reverse proxy & Kubernetes ingress controller written in Go and based largely on [httputil.ReverseProxy](https://pkg.go.dev/net/http/httputil#ReverseProxy) in the Go standard library
 
 Features:
+
 - Host and path based routing, with prefix and exact matching modes.
 - Can run as a Kubernetes ingress controller, utilizing the core `Ingress` resource.
 - Strip path support, removes the matching path before sending on the request.
 - Preserves the host header for the upstream requests, like [any good reverse proxy should](https://learn.microsoft.com/en-us/azure/architecture/best-practices/host-name-preservation).
 - The headers `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto` are set on the upstream request.
+- TODO: TLS support & termination
+
+This was developed as a learning exercise only! If you want an ingress controller for your production Kubernetes cluster you [should look elsewhere](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
 
 ## 📂 Repo Index
 
 ```text
 📂
 ├── build         - Docker build files
-├── deploy      
+├── deploy
 │   ├─ manifests  - Kubernetes manifests to deploy as ingress controller
 │   └─ helm       - Helm chart to deploy as ingress controller
 ├── ingress-ctrl  - Source code of the ingress controller
@@ -36,7 +40,7 @@ You can simply run:
 docker run -p 8080:8080 ghcr.io/benc-uk/nanoproxy-proxy:latest
 ```
 
-But this isn't very helpful! As you will be running with an empty configuration. 
+But this isn't very helpful! As you will be running with an empty configuration.
 To mount a local folder containing your config file locally, try the following:
 
 ```bash
@@ -48,10 +52,10 @@ ghcr.io/benc-uk/nanoproxy-proxy:latest
 
 ## 🧑‍💻 Developing Locally
 
-### Pre-requisites  
+### Pre-requisites
 
 - Go 1.20+
-- Bash and make 
+- Bash and make
 - Docker or other container runtime engine
 
 The makefile should help you get started with this repo
@@ -79,11 +83,11 @@ Run `make install-tools` then use `make run-proxy` or `make run-ctrl` to run eit
 - `TIMEOUT`: Connection and HTTP timeout used by the proxy.
 - `PORT`: Port the proxy will listen on.
 
-## 🎯 Ingress Controller 
+## 🎯 Ingress Controller
 
 ## 🛠️ Proxy Config
 
-When running NanoProxy as a standalone reverse proxy, config is done with YAML and consists of arrays of two main objects, `upstreams` and `rules`. Upstreams are the target servers you want to send requests onto. 
+When running NanoProxy as a standalone reverse proxy, config is done with YAML and consists of arrays of two main objects, `upstreams` and `rules`. Upstreams are the target servers you want to send requests onto.
 Rules are routing rules for matching requests and assigning them to one of the upstreams
 
 By default the file `config.yaml` is loaded, a different name can be set with `-config` argument when starting the proxy.
@@ -91,18 +95,18 @@ By default the file `config.yaml` is loaded, a different name can be set with `-
 ### Upstream
 
 ```yaml
-name:   Name
-host:   Hostname or IP
-port:   Port number, defaults to 80 or 443 when scheme is https
+name: Name
+host: Hostname or IP
+port: Port number, defaults to 80 or 443 when scheme is https
 scheme: Scheme 'http' or 'https', if omitted defaults to 'http'
 ```
 
 ### Rule
 
 ```yaml
-upstream:  Name of the upstream to send traffic to
-path:      URL path in request to match against
-host:      Host in request to match against. If omitted, will match all hosts
+upstream: Name of the upstream to send traffic to
+path: URL path in request to match against
+host: Host in request to match against. If omitted, will match all hosts
 matchMode: How to match the path, 'prefix' or 'exact', defaults to 'prefix'
 stripPath: Remove the path before sending to upstream, true/false, defaults to false
 ```
@@ -128,4 +132,3 @@ rules:
 ```
 
 ## 🤖 Routing and matching logic
-
