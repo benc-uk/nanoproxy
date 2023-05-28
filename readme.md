@@ -5,7 +5,7 @@ NanoProxy is a simple HTTP reverse proxy & Kubernetes ingress controller written
 Features:
 
 - Host and path based routing, with prefix and exact matching modes.
-- Can run as a Kubernetes ingress controller, utilizing the core `Ingress` resource.
+- Can run as a Kubernetes ingress controller, utilizing the core `Ingress` resource. This utilizes the sidecar pattern.
 - Strip path support, removes the matching path before sending on the request.
 - Preserves the host header for the upstream requests, like [any good reverse proxy should](https://learn.microsoft.com/en-us/azure/architecture/best-practices/host-name-preservation).
 - The headers `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto` are set on the upstream request.
@@ -29,8 +29,11 @@ This was developed as a learning exercise only! If you want an ingress controlle
 
 ## ☸️ Deploying to Kubernetes
 
-Blah blah see `deploy/kubernetes`  
-Blah blah Helm blah `deploy/helm`
+🔥 TODO: Beter docs
+
+Example manifests are provided to deploy to Kubernetes as either a s
+
+🔥 TODO: Helm docs
 
 ## 🐋 Running the proxy as container
 
@@ -84,6 +87,8 @@ Run `make install-tools` then use `make run-proxy` or `make run-ctrl` to run eit
 - `PORT`: Port the proxy will listen on.
 
 ## 🎯 Ingress Controller
+
+![Diagram of NanoProxy running as an Ingress Controller](./docs/diagram.drawio.png)
 
 ## 🛠️ Proxy Config
 
