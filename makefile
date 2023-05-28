@@ -55,17 +55,17 @@ push: ## 📤 Push container images
 	docker push $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG)
 	docker push $(IMAGE_REG)/$(IMAGE_NAME)-ingress-ctrl:$(IMAGE_TAG)
 
-run-proxy: ## 🎯 Run proxy locally with hot-reload
+run-proxy: ## 🌐 Run proxy locally with hot-reload
 	@figlet $@ || true
 	@$(AIR_PATH) -c proxy/.air.toml
 
-run-ctrl: ## 🎯 Run controller locally with hot-reload
+run-ctrl: ## 🤖 Run controller locally with hot-reload
 	@figlet $@ || true
 	@$(AIR_PATH) -c ingress-ctrl/.air.toml
 
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true
-	@echo "Not implemented yet"
+	@echo "Not implemented yet! 😵"
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true
