@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Upstreams []Upstream `yaml:"upstreams"`
 	Rules     []Rule     `yaml:"rules"`
+	Filepath  string     `yaml:"-"`
 }
 
 type Upstream struct {
@@ -32,7 +33,6 @@ var configPath = "./config.yaml"
 
 func init() {
 	// Config file path can be set with -c or --config or CONF_FILE env var
-
 	flag.StringVar(&configPath, "config", "./config.yaml", "Path to config file")
 	flag.StringVar(&configPath, "c", "./config.yaml", "Path to config file")
 	flag.Parse()
@@ -43,14 +43,20 @@ func init() {
 	}
 }
 
+func GetPath() string {
+	return configPath
+}
+
 func Load() (*Config, error) {
+
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Printf("Config error: %v", err)
+
 		return nil, err
 	}
 
-	log.Println("Config loaded from: " + configPath)
+	log.Println("Loading config from: " + configPath)
 
 	// Load config file
 	conf := Config{}
@@ -75,7 +81,7 @@ func (c Config) Write() error {
 		return err
 	}
 
-	err = os.WriteFile(configPath, d, 0644)
+	err = os.WriteFile(configPath, d, 0600)
 	if err != nil {
 		return err
 	}

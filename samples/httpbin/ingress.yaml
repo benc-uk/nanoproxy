@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: httpbin
+  labels:
+    name: httpbin
+  annotations:
+    nanoproxy/strip-path: "true"
+spec:
+  ingressClassName: nanoproxy
+  rules:
+  - host: ""
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/httpbin"
+        backend:
+          service:
+            name: httpbin
+            port: 
+              number: 80

@@ -7,7 +7,7 @@ RUN CGO_ENABLED=0 go build -o /bin/proxy \
   -ldflags "-X main.version=$VERSION" ./proxy
 
 # Copy to release image ----------------------------
-FROM alpine
+FROM alpine:3.18
 WORKDIR /app
 COPY --from=build /bin/proxy .
 EXPOSE 8080

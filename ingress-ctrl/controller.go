@@ -20,7 +20,7 @@ import (
 )
 
 // Fixed name
-const ingressClassControllerName = "benc-uk/nanoproxy"
+const ingressControllerName = "benc-uk/nanoproxy"
 
 // IngressReconciler reconciles a Ingress object
 type IngressReconciler struct {
@@ -60,7 +60,7 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// Check ingress class
 	if ingress.Spec.IngressClassName == nil {
-		// TODO: Not sure if this is the right behavior, but it makes life easier
+		// TODO: Not sure if this is the right behaviour, but it makes life easier
 		logger.Info("Ignoring due to missing ingressClassName", "key", key)
 
 		// If we were previously tracking this ingress, remove it
@@ -90,7 +90,7 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	// Finally check the controller name referenced in the IngressClass matches us
-	if ingressClass.Spec.Controller != ingressClassControllerName {
+	if ingressClass.Spec.Controller != ingressControllerName {
 		// Skip
 		return ctrl.Result{}, nil
 	}
@@ -103,31 +103,42 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	return ctrl.Result{}, nil
 }
 
+// Creates a NanoProxy config file from the ingress cache
 func buildConfig() {
 	conf := config.Config{}
 	upstreamMap := make(map[string]config.Upstream)
 
 	// Loop over all ingresses and build up config
 	for _, i := range ingressCache {
-		// Check for annotation to force https
+		// Check for annotations
 		scheme := "http"
+		stripPath := false
+
 		annotations := i.GetAnnotations()
+
 		if annotations != nil && annotations["nanoproxy/backend-protocol"] == "https" {
 			scheme = "https"
+		}
+
+		if annotations != nil && annotations["nanoproxy/strip-path"] == "true" {
+			stripPath = true
 		}
 
 		for _, rule := range i.Spec.Rules {
 			for _, path := range rule.HTTP.Paths {
 				svcName := path.Backend.Service.Name
+				svcFQDN := svcName + "." + i.Namespace + ".svc.cluster.local"
 				svcPort := path.Backend.Service.Port.Number
 				pathString := path.Path
 				if pathString == "" {
 					pathString = "/"
 				}
 
+				upstreamName := svcName + "-" + strconv.Itoa(int(svcPort))
+
 				upstreamMap[svcName+"-"+strconv.Itoa(int(svcPort))] = config.Upstream{
-					Name:   svcName + "-" + strconv.Itoa(int(svcPort)),
-					Host:   svcName,
+					Name:   upstreamName,
+					Host:   svcFQDN,
 					Port:   int(svcPort),
 					Scheme: scheme,
 				}
@@ -139,9 +150,9 @@ func buildConfig() {
 
 				conf.Rules = append(conf.Rules, config.Rule{
 					Path:      pathString,
-					Upstream:  svcName,
+					Upstream:  upstreamName,
 					MatchMode: matchMode,
-					StripPath: false,
+					StripPath: stripPath,
 					Host:      rule.Host,
 				})
 			}

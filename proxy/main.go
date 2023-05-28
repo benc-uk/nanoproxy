@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/benc-uk/nanoproxy/pkg/config"
+	"github.com/fsnotify/fsnotify"
 )
 
 var version = "0.0.0"
@@ -30,16 +31,6 @@ func main() {
 	port := "8080"
 	timeout := 5 * time.Second
 
-	nanoProxy := &NanoProxy{}
-
-	// Load config file
-	configData, err := config.Load()
-	if err != nil {
-		log.Println("Warning: no config file, proxy will do nothing")
-		configData = &config.Config{}
-	}
-	nanoProxy.config = *configData
-
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")
 	}
@@ -49,12 +40,99 @@ func main() {
 		if err != nil {
 			log.Fatalf("Invalid timeout value: %s", os.Getenv("TIMEOUT"))
 		}
+
 		timeout = time.Duration(t) * time.Second
 	}
 
-	nanoProxy.proxies = make(map[string]*httputil.ReverseProxy)
+	nanoProxy := &NanoProxy{}
 
-	for _, u := range nanoProxy.config.Upstreams {
+	// Setup file watcher for config file
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+
+	// Start listening for config file changes
+	go func() {
+		last := time.Now()
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+
+				if event.Op == fsnotify.Write {
+					log.Println("Config file changed:", event.Name)
+					// Ignore multiple events in a short time
+					if time.Since(last) < 500*time.Millisecond {
+						continue
+					}
+
+					last = time.Now()
+
+					// Eurgh, see https://github.com/fsnotify/fsnotify/issues/372
+					time.Sleep(200 * time.Millisecond)
+					// Update & process new config
+					nanoProxy.processConfig(timeout)
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+
+				log.Println("Config watch error:", err)
+			}
+		}
+	}()
+
+	log.Println("Watching config file: " + config.GetPath())
+	err = watcher.Add(config.GetPath())
+	if err != nil {
+		if os.IsNotExist(err) {
+			// Try to create config file and watch it
+			log.Println("Config file not found, creating empty file and watching")
+			err = os.WriteFile(config.GetPath(), []byte(""), 0644)
+			watcher.Add(config.GetPath())
+		} else {
+			log.Fatal(err)
+		}
+	}
+
+	// Process loaded config file
+	nanoProxy.processConfig(timeout)
+
+	// All requests flow through this main handler
+	http.HandleFunc("/", nanoProxy.handle)
+
+	server := &http.Server{
+		Addr:         ":" + port,
+		ReadTimeout:  timeout,
+		WriteTimeout: timeout,
+	}
+
+	log.Println("Server listening on port: " + port)
+
+	err = server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (np *NanoProxy) processConfig(timeout time.Duration) {
+	// Initial load of config file
+	configData, err := config.Load()
+	if err != nil {
+		log.Println("Warning: no config file, proxy will do nothing")
+		configData = &config.Config{}
+	}
+
+	np.config = *configData
+
+	np.proxies = make(map[string]*httputil.ReverseProxy)
+
+	for _, u := range np.config.Upstreams {
 		scheme := u.Scheme
 		if scheme == "" {
 			scheme = "http"
@@ -79,10 +157,10 @@ func main() {
 			continue
 		}
 
-		nanoProxy.proxies[u.Name] = proxy
+		np.proxies[u.Name] = proxy
 	}
 
-	for _, rule := range nanoProxy.config.Rules {
+	for _, rule := range np.config.Rules {
 		if !(rule.MatchMode == "" || rule.MatchMode == "prefix" || rule.MatchMode == "exact") {
 			log.Printf("Rule error: invalid match mode: %s", rule.MatchMode)
 			continue
@@ -94,33 +172,17 @@ func main() {
 		}
 	}
 
-	if len(nanoProxy.config.Rules) <= 0 {
+	if len(np.config.Rules) <= 0 {
 		log.Printf("Warning: config contains no rules")
 	}
 
-	if len(nanoProxy.proxies) <= 0 {
+	if len(np.proxies) <= 0 {
 		log.Printf("Warning: config contains no upstreams")
-	}
-
-	// All requests flow through this main handler
-	http.HandleFunc("/", nanoProxy.handle)
-
-	server := &http.Server{
-		Addr:         ":" + port,
-		ReadTimeout:  timeout,
-		WriteTimeout: timeout,
-	}
-
-	log.Println("Server listening on port: " + port)
-
-	err = server.ListenAndServe()
-	if err != nil {
-		panic(err)
 	}
 }
 
 // The main router for all requests
-func (router NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
+func (np *NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
 	if os.Getenv("DEBUG") != "" {
 		log.Println("Request received: " + r.URL.String())
 	}
@@ -128,7 +190,7 @@ func (router NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
 	// TODO: Optimise this for high volumes of requests and rules
 
 	// Find matching rule, the main routing
-	for _, rule := range router.config.Rules {
+	for _, rule := range np.config.Rules {
 		matched := false
 
 		// Strip port from host
@@ -160,7 +222,7 @@ func (router NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Find proxy named by the rule that was matched
-			p := router.proxies[rule.Upstream]
+			p := np.proxies[rule.Upstream]
 			if p == nil {
 				log.Printf("Rule error: upstream '%s' not found", rule.Upstream)
 				continue

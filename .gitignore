@@ -3,3 +3,5 @@ bin/
 tmp/
 *.yaml
 !*.sample
+!.golangci.yaml
+!/samples/**

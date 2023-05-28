@@ -3,13 +3,11 @@ FROM golang:1.20-alpine AS build
 WORKDIR /src
 ARG VERSION=0.0.0
 COPY . .
-RUN CGO_ENABLED=0 go build -o /bin/proxy \
-  -ldflags "-X main.version=$VERSION" ./proxy
+RUN CGO_ENABLED=0 go build -o /bin/ingress-ctrl \
+  -ldflags "-X main.version=$VERSION" ./ingress-ctrl
 
 # Copy to release image ----------------------------
-FROM alpine
+FROM alpine:3.18
 WORKDIR /app
-COPY --from=build /bin/proxy .
-EXPOSE 8080
-ENV PORT=8080
-CMD ["/app/proxy"]
+COPY --from=build /bin/ingress-ctrl .
+CMD ["/app/ingress-ctrl"]
