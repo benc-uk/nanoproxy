@@ -27,12 +27,12 @@ Prebuilt containers are published on GitHub Container Registry
 
 ## ☸️ Deploying to Kubernetes
 
-🔥 TODO: Better docs
-
 Example manifests are provided to deploy to Kubernetes as
-- A standalone reverse proxy 
 
-🔥 TODO: Helm docs
+- [A standalone reverse proxy](deploy/kubernetes/proxy)
+- [Ingress controller](deploy/kubernetes/ingress-ctrl)
+
+However much better option is to deploy using [the provided Helm chart](deploy/helm).
 
 ## 🐋 Running the proxy as container
 
