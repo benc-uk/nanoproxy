@@ -44,8 +44,8 @@ jobs:
     name: Build and push images
     if: github.ref == 'refs/heads/main'
     env:
-      IMAGE_TAG: latest
-      VERSION: latest-main-branch
+      IMAGE_TAG: dev
+      VERSION: dev-build
     runs-on: ubuntu-latest
     needs: lint-test
     steps:
