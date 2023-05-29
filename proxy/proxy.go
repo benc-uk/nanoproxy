@@ -28,6 +28,7 @@ func NewProxy(targetURL string, timeout time.Duration) (*httputil.ReverseProxy, 
 		return nil, err
 	}
 
+	// This httputil.ReverseProxy is doing a lot of the heavy lifting
 	proxy := httputil.NewSingleHostReverseProxy(incomingURL)
 
 	// create Transport with timeout
