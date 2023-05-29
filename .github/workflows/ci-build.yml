@@ -1,0 +1,61 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - "docs/**"
+      - "deploy/**"
+      - "samples/**"
+      - ".vscode/**"
+      - "**/*.md"
+      - "makefile"
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  packages: write
+
+jobs:
+  lint-test:
+    name: Lint and run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: Install tools
+        run: make install-tools
+
+      - name: Run linting
+        run: make lint
+
+      - name: Run tests
+        run: make test
+
+      - name: Run build
+        run: make build
+
+  image-build:
+    name: Build and push images
+    if: github.ref == 'refs/heads/main'
+    env:
+      IMAGE_TAG: dev
+      VERSION: dev
+      BUILD_INFO: "CI build, SHA:${{ github.sha }}"
+    runs-on: ubuntu-latest
+    needs: lint-test
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build images
+        run: make images
+
+      - name: Push images
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
+          make push

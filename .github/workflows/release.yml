@@ -1,0 +1,49 @@
+name: Release Images
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release"
+        required: true
+        default: "change-me"
+        type: string
+
+env:
+  IMAGE_TAG: ${{ github.event.release.tag_name || github.event.inputs.version }}
+  VERSION: ${{ github.event.release.tag_name || github.event.inputs.version }}
+
+permissions:
+  packages: write
+
+jobs:
+  image-build:
+    name: Build and push images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set BUILD_INFO with date
+        run: |
+          echo BUILD_INFO="Stable build $(date --rfc-3339=seconds)" >> ${GITHUB_ENV}
+
+      - run: |
+          echo ===== RELEASE ======
+          echo VERSION: $VERSION
+          echo IMAGE_TAG: $IMAGE_TAG
+          echo BUILD_INFO: $BUILD_INFO
+
+      - name: Build images
+        run: make images
+
+      - name: Push images
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
+          make push
+
+      - name: Build & push latest
+        env:
+          IMAGE_TAG: latest
+        run: make images push

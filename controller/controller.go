@@ -43,6 +43,7 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// Fetch ingress
 	var ingress netv1.Ingress
 	err := r.Get(ctx, req.NamespacedName, &ingress)
+
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			if ingressCache[key] != nil {
@@ -75,6 +76,7 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// Fetch ingress classes matching the name in the spec
 	var ingressClass netv1.IngressClass
+
 	err = r.Get(ctx, client.ObjectKey{Name: *ingress.Spec.IngressClassName}, &ingressClass)
 	if err != nil {
 		logger.Error(err, "Failed to get ingress class", "key", key)
@@ -97,7 +99,9 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// If we got here, we are tracking this ingress and should update our cache
 	logger.Info("Ingress updated or created", "key", key)
+
 	ingressCache[key] = &ingress
+
 	buildConfig()
 
 	return ctrl.Result{}, nil
@@ -129,6 +133,7 @@ func buildConfig() {
 				svcName := path.Backend.Service.Name
 				svcFQDN := svcName + "." + i.Namespace + ".svc.cluster.local"
 				svcPort := path.Backend.Service.Port.Number
+
 				pathString := path.Path
 				if pathString == "" {
 					pathString = "/"

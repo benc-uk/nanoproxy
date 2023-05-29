@@ -56,6 +56,7 @@ func main() {
 	// Start listening for config file changes
 	go func() {
 		last := time.Now()
+
 		for {
 			select {
 			case event, ok := <-watcher.Events:
@@ -74,6 +75,7 @@ func main() {
 
 					// Eurgh, see https://github.com/fsnotify/fsnotify/issues/372
 					time.Sleep(200 * time.Millisecond)
+
 					// Update & process new config
 					nanoProxy.processConfig(timeout)
 				}
@@ -89,12 +91,15 @@ func main() {
 
 	log.Println("Watching config file: " + config.GetPath())
 	err = watcher.Add(config.GetPath())
+
 	if err != nil {
 		if os.IsNotExist(err) {
 			// Try to create config file and watch it
+			// Ignore errors in here otherwise there's no escape
 			log.Println("Config file not found, creating empty file and watching")
-			err = os.WriteFile(config.GetPath(), []byte(""), 0644)
-			watcher.Add(config.GetPath())
+
+			_ = os.WriteFile(config.GetPath(), []byte(""), 0600)
+			_ = watcher.Add(config.GetPath())
 		} else {
 			log.Fatal(err)
 		}
@@ -105,6 +110,14 @@ func main() {
 
 	// All requests flow through this main handler
 	http.HandleFunc("/", nanoProxy.handle)
+
+	if os.Getenv("DEBUG") != "" {
+		log.Println("Debug mode enabled, exposing /.config endpoint")
+
+		http.HandleFunc("/.config", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte(nanoProxy.config.Dump()))
+		})
+	}
 
 	server := &http.Server{
 		Addr:         ":" + port,
@@ -125,6 +138,7 @@ func (np *NanoProxy) processConfig(timeout time.Duration) {
 	configData, err := config.Load()
 	if err != nil {
 		log.Println("Warning: no config file, proxy will do nothing")
+
 		configData = &config.Config{}
 	}
 

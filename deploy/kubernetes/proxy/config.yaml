@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nanoproxy
+data:
+  config.yaml: |
+    server:
+      timeout: 10
+    upstreams:
+      - name: httpBin
+        host: httpbin.org
+    rules:
+      - upstream: httpBin
+        path: /httpbin
+        stripPath: true

@@ -1,0 +1,53 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: nanoproxy 
+spec:
+  selector:
+    matchLabels:
+      app: nanoproxy
+  template:
+    metadata:
+      labels:
+        app: nanoproxy
+    spec:
+      serviceAccount: nanoproxy
+      containers:
+        - name: proxy
+          image: ghcr.io/benc-uk/nanoproxy-proxy:latest 
+          imagePullPolicy: Always
+          env:
+            - name: CONF_FILE
+              value: /conf/config.yaml
+            - name: DEBUG
+              value: "true"
+          resources:
+            limits:
+              memory: "256M"
+              cpu: "1"
+
+          ports:
+            - containerPort: 8080
+
+          volumeMounts:
+            - mountPath: /conf/
+              name: conf-volume
+
+        - name: controller
+          image: ghcr.io/benc-uk/nanoproxy-controller:latest 
+          imagePullPolicy: Always
+          env:
+            - name: CONF_FILE
+              value: /conf/config.yaml
+          resources:
+            limits:
+              memory: "256M"
+              cpu: "1"
+          volumeMounts:
+            - mountPath: /conf/
+              name: conf-volume 
+              
+      volumes:
+        - name: conf-volume
+          emptyDir:
+            medium: Memory

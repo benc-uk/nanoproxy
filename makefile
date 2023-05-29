@@ -44,16 +44,17 @@ build: ## 🔨 Build binary into ./bin/ directory
 	@figlet $@ || true
 	@mkdir -p bin
 	@go build -o bin/nanoproxy ./proxy
+	@go build -o bin/controller ./controller
 
 images: ## 📦 Build container images
 	@figlet $@ || true
 	docker build . -f build/Dockerfile.proxy -t $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG) --build-arg VERSION=$(VERSION)
-	docker build . -f build/Dockerfile.ingress-ctrl -t $(IMAGE_REG)/$(IMAGE_NAME)-ingress-ctrl:$(IMAGE_TAG) --build-arg VERSION=$(VERSION)
+	docker build . -f build/Dockerfile.controller -t $(IMAGE_REG)/$(IMAGE_NAME)-controller:$(IMAGE_TAG) --build-arg VERSION=$(VERSION)
 
 push: ## 📤 Push container images
 	@figlet $@ || true
 	docker push $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG)
-	docker push $(IMAGE_REG)/$(IMAGE_NAME)-ingress-ctrl:$(IMAGE_TAG)
+	docker push $(IMAGE_REG)/$(IMAGE_NAME)-controller:$(IMAGE_TAG)
 
 run-proxy: ## 🌐 Run proxy locally with hot-reload
 	@figlet $@ || true
@@ -61,7 +62,7 @@ run-proxy: ## 🌐 Run proxy locally with hot-reload
 
 run-ctrl: ## 🤖 Run controller locally with hot-reload
 	@figlet $@ || true
-	@$(AIR_PATH) -c ingress-ctrl/.air.toml
+	@$(AIR_PATH) -c controller/.air.toml
 
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true

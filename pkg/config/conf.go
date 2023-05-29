@@ -48,7 +48,6 @@ func GetPath() string {
 }
 
 func Load() (*Config, error) {
-
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Printf("Config error: %v", err)
@@ -87,4 +86,13 @@ func (c Config) Write() error {
 	}
 
 	return nil
+}
+
+func (c Config) Dump() string {
+	d, err := yaml.Marshal(&c)
+	if err != nil {
+		return ""
+	}
+
+	return string(d)
 }
