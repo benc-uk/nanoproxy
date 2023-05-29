@@ -1,6 +1,12 @@
 # NanoProxy
 
-NanoProxy is a simple HTTP reverse proxy & Kubernetes ingress controller written in Go and based largely on [httputil.ReverseProxy](https://pkg.go.dev/net/http/httputil#ReverseProxy) in the Go standard library. This was developed as a learning exercise only! If you want an ingress controller for your production Kubernetes cluster you [should look elsewhere](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
+<img src="docs/logo.png" align="left" width="200px"/>
+
+NanoProxy is a simple HTTP reverse proxy & Kubernetes ingress controller written in Go and based largely on [httputil.ReverseProxy](https://pkg.go.dev/net/http/httputil#ReverseProxy) in the Go standard library. It was designed for traffic routing and less for load balancing.
+
+This was developed as a learning exercise only! If you want an ingress controller for your production Kubernetes cluster you [should look elsewhere](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
+
+<br clear="left"/>
 
 Features:
 
