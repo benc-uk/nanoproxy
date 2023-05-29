@@ -46,6 +46,7 @@ func main() {
 	if os.Getenv("PORT") != "" {
 		portString = os.Getenv("PORT")
 	}
+
 	port, _ := strconv.Atoi(portString)
 
 	options := ctrl.Options{
