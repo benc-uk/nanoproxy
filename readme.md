@@ -28,15 +28,14 @@ Prebuilt containers are published on GitHub Container Registry
 
 ![](https://img.shields.io/github/last-commit/benc-uk/nanoproxy)
 ![](https://img.shields.io/github/release/benc-uk/nanoproxy)
-![](https://img.shields.io/github/checks-status/benc-uk/nanoproxy/main)
 ![](https://img.shields.io/github/actions/workflow/status/benc-uk/nanoproxy/ci-build.yml?branch=main)
 
 ## ☸️ Deploying to Kubernetes
 
-Example manifests are provided to deploy to Kubernetes as
+Example manifests are provided to deploy to Kubernetes
 
+- [A Ingress controller](deploy/kubernetes/ingress-ctrl)
 - [A standalone reverse proxy](deploy/kubernetes/proxy)
-- [Ingress controller](deploy/kubernetes/ingress-ctrl)
 
 However much better option is to deploy using [the provided Helm chart](deploy/helm).
 
@@ -134,7 +133,8 @@ rules:
 
 - `CONF_FILE`: This is used by both the proxy and the controller to set the path of the config file used.
 - `TIMEOUT`: Connection and HTTP timeout used by the proxy.
-- `PORT`: Port the proxy will listen on
+- `PORT`: Port the proxy will listen on, also on controller for it's webhook listener which isn't used
+- `DEBUG`: Port the proxy will listen on
 
 ## 🤖 Routing and matching logic
 

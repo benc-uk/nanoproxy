@@ -43,6 +43,7 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
           make push
 
+      # We make `latest` tag point to the same version
       - name: Build & push latest
         env:
           IMAGE_TAG: latest
