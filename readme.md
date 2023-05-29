@@ -23,8 +23,7 @@ Prebuilt containers are published on GitHub Container Registry
 ![](https://img.shields.io/github/last-commit/benc-uk/nanoproxy)
 ![](https://img.shields.io/github/release/benc-uk/nanoproxy)
 ![](https://img.shields.io/github/checks-status/benc-uk/nanoproxy/main)
-![](https://img.shields.io/github/workflow/status/benc-uk/nanoproxy/CI%20Build?label=ci-build)
-
+![](https://img.shields.io/github/actions/workflow/status/benc-uk/nanoproxy/ci-build.yml?branch=main)
 
 ## ☸️ Deploying to Kubernetes
 
