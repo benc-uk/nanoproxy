@@ -12,6 +12,7 @@ on:
         type: string
 
 env:
+  # Note the version and image tag are the same
   IMAGE_TAG: ${{ github.event.release.tag_name || github.event.inputs.version }}
   VERSION: ${{ github.event.release.tag_name || github.event.inputs.version }}
 
@@ -33,7 +34,6 @@ jobs:
           echo ===== RELEASE ======
           echo VERSION: $VERSION
           echo IMAGE_TAG: $IMAGE_TAG
-          echo BUILD_INFO: $BUILD_INFO
 
       - name: Build images
         run: make images

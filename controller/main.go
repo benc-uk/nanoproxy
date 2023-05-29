@@ -8,6 +8,7 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
@@ -30,26 +31,54 @@ func init() {
 func main() {
 	log.Println("Starting ingress controller for nanoproxy")
 
+	// A reasonable detection if we are running in a Kubernetes cluster
+	inKube := true
+	if _, err := os.Stat("/var/run/secrets/kubernetes.io"); os.IsNotExist(err) {
+		inKube = false
+	}
+
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&zap.Options{
-		Development: true,
+		Development: !inKube,
 	})))
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Port:                   9443,
-		Scheme:                 scheme,
-		MetricsBindAddress:     ":9891",
+	// Can listen on any port, but best not eh?
+	portString := "9090"
+	if os.Getenv("PORT") != "" {
+		portString = os.Getenv("PORT")
+	}
+	port, _ := strconv.Atoi(portString)
+
+	options := ctrl.Options{
+		Port:   port,
+		Scheme: scheme,
+
+		// Disable health probes and metrics
+		MetricsBindAddress:     "0",
 		HealthProbeBindAddress: "",
-		LeaderElection:         false,
-	})
+
+		LeaderElection: false,
+	}
+
+	// If we are running in a Kubernetes cluster, enable leader election
+	if inKube {
+		options.LeaderElection = true
+		options.LeaderElectionID = "nanoproxy-leader-lock"
+	}
+
+	// The manager will setup the controller, handle elections
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
-	if err = (&IngressReconciler{
+	// This is the controller that will reconcile ingress objects
+	reconciler := &IngressReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	}
+
+	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Ingress")
 		os.Exit(1)
 	}

@@ -33,7 +33,6 @@ High level steps:
 2. If you've changed APIs, update the documentation.
 3. Ensure the test suite (if any) passes (run `make test`).
 4. Make sure your code lints (run `make lint`).
-5. Issue that pull request!
 
 ## Any contributions you make will be under the MIT Software License
 
@@ -57,7 +56,7 @@ This project uses GitHub issues to track public bugs. Report a bug by [opening a
 
 ## Use a consistent coding style
 
-Run `make lint-fix` in order to format the code fix any formatting & linting issues that might be present. A [Prettier](https://prettier.io/) configuration file is included
+Run `make lint-fix` in order to format the code fix any formatting & linting issues that might be present.
 
 # References
 

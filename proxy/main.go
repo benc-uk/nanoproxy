@@ -133,19 +133,24 @@ func main() {
 	}
 }
 
+// This loads config and creates the reverse proxies
 func (np *NanoProxy) processConfig(timeout time.Duration) {
-	// Initial load of config file
+	// Load config from file
 	configData, err := config.Load()
 	if err != nil {
 		log.Println("Warning: no config file, proxy will do nothing")
 
+		// Create empty config, so we don't panic later
 		configData = &config.Config{}
 	}
 
 	np.config = *configData
 
+	// This is the map of reverse proxies, keyed by upstream name
 	np.proxies = make(map[string]*httputil.ReverseProxy)
 
+	// Construct reverse proxies for each upstream
+	// Note the term upstream is used in the config file, but we call them proxies here
 	for _, u := range np.config.Upstreams {
 		scheme := u.Scheme
 		if scheme == "" {
@@ -167,13 +172,14 @@ func (np *NanoProxy) processConfig(timeout time.Duration) {
 
 		proxy, err := NewProxy(scheme+"://"+u.Host+":"+strconv.Itoa(u.Port), timeout)
 		if err != nil {
-			log.Fatalf("proxy error: %v", err)
+			log.Fatalf("Error with reverse proxy: %v", err)
 			continue
 		}
 
 		np.proxies[u.Name] = proxy
 	}
 
+	// Validate & check rules
 	for _, rule := range np.config.Rules {
 		if !(rule.MatchMode == "" || rule.MatchMode == "prefix" || rule.MatchMode == "exact") {
 			log.Printf("Rule error: invalid match mode: %s", rule.MatchMode)
@@ -195,7 +201,7 @@ func (np *NanoProxy) processConfig(timeout time.Duration) {
 	}
 }
 
-// The main router for all requests
+// This is the main router for all proxied requests
 func (np *NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
 	if os.Getenv("DEBUG") != "" {
 		log.Println("Request received: " + r.URL.String())
@@ -203,7 +209,7 @@ func (np *NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Optimise this for high volumes of requests and rules
 
-	// Find matching rule, the main routing
+	// Find matching rule, the main routing logic
 	for _, rule := range np.config.Rules {
 		matched := false
 
@@ -220,7 +226,7 @@ func (np *NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
 
 		// Match on host first, empty host matches all
 		if rule.Host == "" || hostname == rule.Host {
-			// Match on prefix which is the default if not specified
+			// Match path on prefix which is the default MatchMode
 			if (rule.MatchMode == "prefix" || rule.MatchMode == "") && strings.HasPrefix(r.URL.Path, rule.Path) {
 				matched = true
 			}
@@ -230,14 +236,15 @@ func (np *NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		// Path and/or host was matched to this rule, so proxy the request
 		if matched {
 			if os.Getenv("DEBUG") != "" {
 				log.Printf("Matched rule: %s_%s_%s", rule.Upstream, rule.Host, rule.Path)
 			}
 
 			// Find proxy named by the rule that was matched
-			p := np.proxies[rule.Upstream]
-			if p == nil {
+			proxy := np.proxies[rule.Upstream]
+			if proxy == nil {
 				log.Printf("Rule error: upstream '%s' not found", rule.Upstream)
 				continue
 			}
@@ -247,12 +254,15 @@ func (np *NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
 				r.URL.Path = strings.Replace(r.URL.Path, rule.Path, "", 1)
 			}
 
-			p.ServeHTTP(w, r)
+			// It all comes down to this, proxy the request
+			proxy.ServeHTTP(w, r)
 
+			// Don't process any more rules
 			return
 		}
 	}
 
+	// Fall through, no matching rule found so return 404
 	w.WriteHeader(http.StatusNotFound)
 	_, _ = w.Write([]byte("No matching rule for host & path"))
 }

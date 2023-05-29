@@ -3,7 +3,7 @@ tmp_dir = "tmp"
 
 [build]
   bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ./ingress-ctrl"
+  cmd = "go build -o ./tmp/main ./controller"
   exclude_dir = ["bin", "tmp", "build", "deploy"]
   include_dir = []
   include_ext = ["go"]

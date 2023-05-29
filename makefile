@@ -5,7 +5,6 @@ endif
 
 # Common - can be overridden by .env file or when running make
 VERSION ?= 0.0.1
-BUILD_INFO ?= Local and manual build
 
 # Override these if building your own images
 IMAGE_REG ?= ghcr.io
@@ -73,3 +72,10 @@ clean: ## 🧹 Clean up, remove dev data and files
 	@rm -rf bin
 	@rm -rf .tools
 	@rm -rf tmp
+
+release: ## 🚀 Create a release, builds and pushes images
+	@figlet $@ || true
+	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	gh release create "$(VERSION)" --title "v$(VERSION)" \
+	--generate-notes \
+	-F docs/release-notes.md

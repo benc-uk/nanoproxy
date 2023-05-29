@@ -2,5 +2,5 @@ bin/
 .tools/
 tmp/
 !*.sample
-!.golangci.yaml
 !/samples/**
+config.yaml
