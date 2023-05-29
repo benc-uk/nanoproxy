@@ -34,7 +34,7 @@ install-tools: ## 🔮 Install dev tools into project bin directory
 	
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
-	$(GOLINT_PATH) run
+	$(GOLINT_PATH) run --timeout 3m
 
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
