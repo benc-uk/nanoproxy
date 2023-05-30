@@ -5,9 +5,7 @@ metadata:
   labels:
     {{- include "nanoproxy.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "nanoproxy.selectorLabels" . | nindent 6 }}
@@ -28,25 +26,49 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: proxy
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.prefix }}-proxy:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CONF_FILE
+              value: /conf/config.yaml    
+            - name: DEBUG
+              value: {{ quote .Values.debug }}   
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: 8080
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /.nanoproxy/health
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /conf/
+              name: conf-volume 
+
+        - name: controller
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.prefix }}-controller:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CONF_FILE
+              value: /conf/config.yaml          
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}  
+          volumeMounts:
+            - mountPath: /conf/
+              name: conf-volume 
+
+      volumes:
+        - name: conf-volume
+          emptyDir:
+            medium: Memory
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
