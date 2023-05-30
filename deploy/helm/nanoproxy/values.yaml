@@ -14,7 +14,7 @@ image:
   # -- Prefix for the image repository, '-proxy' and '-controller' will be appended
   prefix: ghcr.io/benc-uk/nanoproxy
   # -- Image pull policy
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # -- Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
