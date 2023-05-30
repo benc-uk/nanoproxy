@@ -4,3 +4,4 @@ tmp/
 !*.sample
 !/samples/**
 config.yaml
+myvalues.yaml

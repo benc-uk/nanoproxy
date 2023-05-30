@@ -1,12 +1,5 @@
-ifneq (,$(wildcard ./.env))
-	include .env
-	export
-endif
-
-# Common - can be overridden by .env file or when running make
-VERSION ?= 0.0.1
-
 # Override these if building your own images
+VERSION ?= 0.0.2
 IMAGE_REG ?= ghcr.io
 IMAGE_NAME ?= benc-uk/nanoproxy
 IMAGE_TAG ?= latest
@@ -19,7 +12,7 @@ GOLINT_PATH := $(REPO_DIR)/.tools/golangci-lint
 AIR_PATH := $(REPO_DIR)/.tools/air
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: help images push lint lint-fix install-tools run build
+.PHONY: help images push lint lint-fix install-tools run-proxy run-ctrl release test build
 .DEFAULT_GOAL := help
 
 help: ## 💬 This help message :)

@@ -1,5 +1,8 @@
-First release!
+Second release, gosh wow.
 
 Adds:
-- Everything
+- Health endpoint to proxy
+- A Helm chart for deployment
 
+Removes:
+- Leader election in controller, it's not required
