@@ -65,7 +65,6 @@ func main() {
 				}
 
 				if event.Op == fsnotify.Write {
-					log.Println("Config file changed:", event.Name)
 					// Ignore multiple events in a short time
 					if time.Since(last) < 500*time.Millisecond {
 						continue
@@ -112,7 +111,7 @@ func main() {
 	http.HandleFunc("/", nanoProxy.handle)
 
 	if os.Getenv("DEBUG") != "" {
-		log.Println("Debug mode enabled, exposing /.config endpoint")
+		log.Println("Debug enabled, exposing /.nanoproxy/config endpoint")
 
 		http.HandleFunc("/.nanoproxy/config", func(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write([]byte(nanoProxy.config.Dump()))

@@ -1,8 +1,14 @@
 # -- Replica count
 replicaCount: 1
 
+ingressClass:
+  # -- Create an IngressClass resource
+  create: true
+  # -- Name of the IngressClass resource
+  name: nanoproxy
+
 # -- Turn on debug logging in the proxy
-debug: false
+debug: ""
 
 image:
   # -- Prefix for the image repository, '-proxy' and '-controller' will be appended

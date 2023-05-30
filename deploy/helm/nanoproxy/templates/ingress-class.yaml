@@ -1,7 +1,9 @@
+{{- if .Values.ingressClass.create -}}
 apiVersion: networking.k8s.io/v1
 kind: IngressClass
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Values.ingressClass.name }}
 spec:
   # This controller name is hardcoded and should not be changed
   controller: benc-uk/nanoproxy
+{{- end -}}

@@ -68,6 +68,7 @@ clean: ## 🧹 Clean up, remove dev data and files
 
 release: ## 🚀 Create a release, builds and pushes images
 	@figlet $@ || true
+	@echo "Releasing version $(VERSION) on GitHub"
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	gh release create "$(VERSION)" --title "v$(VERSION)" \
 	--notes-file docs/release-notes.md \
