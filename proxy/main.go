@@ -267,6 +267,10 @@ func (np *NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if os.Getenv("DEBUG") != "" {
+		log.Printf("No matching rule for request - host:%s path:%s", r.Host, r.URL.Path)
+	}
+
 	// Fall through, no matching rule found so return 404
 	w.WriteHeader(http.StatusNotFound)
 	_, _ = w.Write([]byte("No matching rule for host & path"))
