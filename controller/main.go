@@ -57,14 +57,9 @@ func main() {
 		MetricsBindAddress:     "0",
 		HealthProbeBindAddress: "",
 
+		// Running as a sidecar in a pod, disable leader election
 		LeaderElection: false,
 	}
-
-	// If we are running in a Kubernetes cluster, enable leader election
-	// if inKube {
-	// 	options.LeaderElection = true
-	// 	options.LeaderElectionID = "nanoproxy-leader-lock"
-	// }
 
 	// The manager will setup the controller, handle elections
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
