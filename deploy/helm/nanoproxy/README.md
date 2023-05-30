@@ -12,7 +12,7 @@ NanoProxy ingress controller
 | debug | string | `""` | Turn on debug logging in the proxy |
 | fullnameOverride | string | `""` | Override the fullname used when creating resources |
 | image.prefix | string | `"ghcr.io/benc-uk/nanoproxy"` | Prefix for the image repository, '-proxy' and '-controller' will be appended |
-| image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
+| image.pullPolicy | string | `"Always"` | Image pull policy |
 | image.tag | string | `""` | Overrides the image tag whose default is the chart appVersion. |
 | imagePullSecrets | list | `[]` | Set the imagePullSecrets value to enable pulling images from private registry |
 | ingressClass.create | bool | `true` | Create an IngressClass resource |

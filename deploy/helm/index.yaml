@@ -3,12 +3,12 @@ entries:
   nanoproxy:
   - apiVersion: v2
     appVersion: 0.0.2
-    created: "2023-05-30T22:24:38.255876904+01:00"
+    created: "2023-05-30T22:49:11.434555325+01:00"
     description: NanoProxy ingress controller
-    digest: ada8ebb93641d488cdcf3af206cf5d1856484e5f54f21cb03201422d38161320
+    digest: 8057192bc00496651564b8e745c9a82d2c96f69f9020d1d05860b6048032c1a3
     name: nanoproxy
     type: application
     urls:
     - nanoproxy-0.0.2.tgz
     version: 0.0.2
-generated: "2023-05-30T22:24:38.254970889+01:00"
+generated: "2023-05-30T22:49:11.433517721+01:00"
