@@ -11,13 +11,15 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"time"
 )
 
 const (
-	proxyName    = "Nanoproxy"
-	proxyVersion = "0.0.1"
+	proxyName = "Nanoproxy"
 )
+
+var hostname string
 
 // Builds a httputil.ReverseProxy based on a target URL and timeout
 func NewProxy(targetURL string, timeout time.Duration) (*httputil.ReverseProxy, error) {
@@ -43,13 +45,20 @@ func NewProxy(targetURL string, timeout time.Duration) (*httputil.ReverseProxy, 
 	proxy.Rewrite = modifyRequest(incomingURL)
 	proxy.ModifyResponse = modifyResponse()
 
+	// get hostname of where we are running
+	hostname, err = os.Hostname()
+	if err != nil {
+		hostname = "unknown"
+	}
+
 	return proxy, nil
 }
 
 // This isn't really doing a lot but could be used to modify the response
 func modifyResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
-		resp.Header.Set("X-Proxy", proxyName+"/"+proxyVersion)
+		resp.Header.Set("X-Proxy", proxyName+"/"+version)
+		resp.Header.Set("X-Proxy-Instance", hostname)
 		return nil
 	}
 }
