@@ -114,10 +114,15 @@ func main() {
 	if os.Getenv("DEBUG") != "" {
 		log.Println("Debug mode enabled, exposing /.config endpoint")
 
-		http.HandleFunc("/.config", func(w http.ResponseWriter, r *http.Request) {
+		http.HandleFunc("/.nanoproxy/config", func(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write([]byte(nanoProxy.config.Dump()))
 		})
 	}
+
+	// Add health check endpoint, weird name to try to avoid clashes
+	http.HandleFunc("/.nanoproxy/health", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("OK"))
+	})
 
 	server := &http.Server{
 		Addr:         ":" + port,

@@ -134,9 +134,14 @@ rules:
 - `CONF_FILE`: This is used by both the proxy and the controller to set the path of the config file used.
 - `TIMEOUT`: Connection and HTTP timeout used by the proxy.
 - `PORT`: Port the proxy will listen on, also on controller for it's webhook listener which isn't used
-- `DEBUG`: Set to non-blank, for extra logging and output from the proxy. Also enables a `\.config` endpoint on the proxy for dumping the config via a HTTP GET.
+- `DEBUG`: Set to non-blank, for extra logging and output from the proxy. Also enables the special config endpoint (see below)
 
-## 🤖 Routing and matching logic
+## 🤖 Notes on proxy
+
+The proxy exposes two routes of it's own:
+
+- `/.nanoproxy/health` Used for health checks
+- `/.nanoproxy/config` Dumps the in memory config, only enabled when DEBUG is set
 
 The proxy applies the following logic to incoming requests to decide how to route them:
 
@@ -144,8 +149,8 @@ The proxy applies the following logic to incoming requests to decide how to rout
   - Loop over all the `rules`
   - If the rule has a `host` set, match it with the hostname
   - OR if the rule has an empty `host` field
-    - Match the request path to the rule `path`, matching can be prefix or exact
-    - If match is made this rule is selected and no further rules are checked
+    - Match the request path to the rule `path`, matching can be `prefix` or `exact`
+    - If match is made this `rule` is selected and no further rules are checked
       - Get the matching named `upstream` referenced by the `rule`
       - Pass HTTP request to the reverse proxy for that `upstream`
 
