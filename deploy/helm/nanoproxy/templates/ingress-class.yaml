@@ -3,4 +3,5 @@ kind: IngressClass
 metadata:
   name: {{ .Chart.Name }}
 spec:
+  # This controller name is hardcoded and should not be changed
   controller: benc-uk/nanoproxy
