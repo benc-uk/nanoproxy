@@ -61,10 +61,10 @@ func main() {
 	}
 
 	// If we are running in a Kubernetes cluster, enable leader election
-	if inKube {
-		options.LeaderElection = true
-		options.LeaderElectionID = "nanoproxy-leader-lock"
-	}
+	// if inKube {
+	// 	options.LeaderElection = true
+	// 	options.LeaderElectionID = "nanoproxy-leader-lock"
+	// }
 
 	// The manager will setup the controller, handle elections
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
