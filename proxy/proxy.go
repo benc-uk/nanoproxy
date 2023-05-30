@@ -59,6 +59,7 @@ func modifyResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
 		resp.Header.Set("X-Proxy", proxyName+"/"+version)
 		resp.Header.Set("X-Proxy-Instance", hostname)
+
 		return nil
 	}
 }
