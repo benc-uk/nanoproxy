@@ -32,12 +32,14 @@ Prebuilt containers are published on GitHub Container Registry
 
 ## ☸️ Deploying to Kubernetes
 
-Example manifests are provided to deploy to Kubernetes
+Using the NanoProxy Helm chart is the recommended way to install as an ingress controller into your cluster
+
+- [Docs for the ingress controller Helm chart](deploy/helm/readme.md)
+
+If you really don't want to use Helm for some reason, basic manifests are also provided to deploy as:
 
 - [A Ingress controller](deploy/kubernetes/ingress-ctrl)
 - [A standalone reverse proxy](deploy/kubernetes/proxy)
-
-However much better option is to deploy using [the provided Helm chart](deploy/helm).
 
 ## 🐋 Running the proxy as container
 
