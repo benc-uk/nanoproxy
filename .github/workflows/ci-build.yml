@@ -47,7 +47,7 @@ jobs:
       IMAGE_REG: ghcr.io
       IMAGE_NAME: benc-uk/nanoproxy
       IMAGE_TAG: dev
-      VERSION: dev-build
+      VERSION: main-branch
     runs-on: ubuntu-latest
     needs: lint-test
     steps:

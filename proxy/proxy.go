@@ -6,6 +6,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
 	"net"
 	"net/http"
@@ -33,11 +34,22 @@ func NewProxy(targetURL string, timeout time.Duration) (*httputil.ReverseProxy, 
 	// This httputil.ReverseProxy is doing a lot of the heavy lifting
 	proxy := httputil.NewSingleHostReverseProxy(incomingURL)
 
+	// Check if we should skip TLS verification
+	skipTLSVerify := false
+
+	skipTLSVerifyEnv := os.Getenv("TLS_SKIP_VERIFY")
+	if skipTLSVerifyEnv != "" {
+		skipTLSVerify = true
+	}
+
 	// create Transport with timeout
 	proxy.Transport = &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout: timeout,
 		}).DialContext,
+
+		//nolint:gosec
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
 	}
 
 	// Hook in our own request/response modifiers

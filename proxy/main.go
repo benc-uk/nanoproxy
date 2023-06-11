@@ -6,6 +6,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -30,6 +31,12 @@ func main() {
 
 	port := "8080"
 	timeout := 5 * time.Second
+	certPath := ""
+
+	// Used for TLS, directory where cert.pem and key.pem are found
+	if os.Getenv("CERT_PATH") != "" {
+		certPath = os.Getenv("CERT_PATH")
+	}
 
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")
@@ -127,13 +134,27 @@ func main() {
 		Addr:         ":" + port,
 		ReadTimeout:  timeout,
 		WriteTimeout: timeout,
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			MaxVersion: tls.VersionTLS13,
+		},
 	}
 
 	log.Println("Server listening on port: " + port)
 
-	err = server.ListenAndServe()
-	if err != nil {
-		panic(err)
+	if certPath != "" {
+		log.Printf("Using TLS, loading cert & key from: %s %s", certPath+"/cert.pem", certPath+"/key.pem")
+		log.Println("Server will only accept HTTPS traffic")
+
+		err = server.ListenAndServeTLS(certPath+"/cert.pem", certPath+"/key.pem")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		err = server.ListenAndServe()
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
