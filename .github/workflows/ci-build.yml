@@ -44,6 +44,8 @@ jobs:
     name: Build and push images
     if: github.ref == 'refs/heads/main'
     env:
+      IMAGE_REG: ghcr.io
+      IMAGE_NAME: benc-uk/nanoproxy
       IMAGE_TAG: dev
       VERSION: dev-build
     runs-on: ubuntu-latest

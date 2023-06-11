@@ -1,23 +1,32 @@
-# Override these if building your own images
-VERSION ?= 0.0.2
-IMAGE_REG ?= ghcr.io
-IMAGE_NAME ?= benc-uk/nanoproxy
-IMAGE_TAG ?= latest
+# Set ENV to dev, prod, etc. to load .env.$(ENV) file
+ENV ?= 
+-include .env
+export
+-include .env.$(ENV)
+export
 
-# Things you don't want to change
+# Internal variables you don't want to change
+SHELL := /bin/bash
+MAKEFLAGS += --warn-undefined-variables --no-builtin-rules
 REPO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-
-# Tools installed locally into repo, don't change
 GOLINT_PATH := $(REPO_DIR)/.tools/golangci-lint
 AIR_PATH := $(REPO_DIR)/.tools/air
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: help images push lint lint-fix install-tools run-proxy run-ctrl release test build
+.PHONY: help images push lint lint-fix install-tools run-proxy run-ctrl release test build check-vars
 .DEFAULT_GOAL := help
+
+print-env: ## 🚿 Print all env vars for debugging
+	@figlet $@ || true
+	@echo "Environment: ${ENV}"
+	@echo "VERSION: $(VERSION)"
+	@echo "IMAGE_REG: $(IMAGE_REG)"
+	@echo "IMAGE_NAME: $(IMAGE_NAME)"
+	@echo "IMAGE_TAG: $(IMAGE_TAG)"
 
 help: ## 💬 This help message :)
 	@figlet $@ || true
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 install-tools: ## 🔮 Install dev tools into project bin directory
 	@figlet $@ || true
@@ -38,12 +47,12 @@ build: ## 🔨 Build binary into ./bin/ directory
 	@go build -o bin/nanoproxy ./proxy
 	@go build -o bin/controller ./controller
 
-images: ## 📦 Build container images
+images: check-vars ## 📦 Build container images
 	@figlet $@ || true
 	docker build . -f build/Dockerfile.proxy -t $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG) --build-arg VERSION=$(VERSION)
 	docker build . -f build/Dockerfile.controller -t $(IMAGE_REG)/$(IMAGE_NAME)-controller:$(IMAGE_TAG) --build-arg VERSION=$(VERSION)
 
-push: ## 📤 Push container images
+push: check-vars ## 📤 Push container images
 	@figlet $@ || true
 	docker push $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG)
 	docker push $(IMAGE_REG)/$(IMAGE_NAME)-controller:$(IMAGE_TAG)
@@ -62,19 +71,17 @@ test: ## 🧪 Run all unit tests
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true
-	@rm -rf bin
-	@rm -rf .tools
-	@rm -rf tmp
+	@rm -rf bin .tools tmp
 
-release: ## 🚀 Create a release, builds and pushes images
+release: ## 🚀 Release a new version on GitHub
 	@figlet $@ || true
-	@echo "Releasing version $(VERSION) on GitHub"
+	@echo "💢 Releasing version $(VERSION) on GitHub"
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	gh release create "$(VERSION)" --title "v$(VERSION)" \
 	--notes-file docs/release-notes.md \
 	--latest 
 
-helm-package:
+helm-package: ## 🔠 Package Helm chart and update index
 	@figlet $@ || true
 	helm-docs --chart-search-root deploy/helm
 	helm package deploy/helm/nanoproxy -d deploy/helm

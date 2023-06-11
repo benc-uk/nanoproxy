@@ -7,14 +7,9 @@ linters:
   enable:
     - revive      # Replacement for golint
     - gofmt       # Runs gofmt as part of the linter
-    #- gosec       # Find security issues
+    - gosec       # Find security issues
     - wsl         # Whitespace linter
-    #- stylecheck  # A few Go style rules
     - misspell    # Find misspelled words
-    #- bodyclose   # Check for HTTP body close errors
-    #- nilerr      # Find bad nil/err handling
-    #- nilnil      # Also find bad nil/err handling
-    #- tagliatelle # Find badly named struct tags
 
 linters-settings:
   misspell:

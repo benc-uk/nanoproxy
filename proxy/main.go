@@ -94,7 +94,7 @@ func main() {
 	if err != nil {
 		if os.IsNotExist(err) {
 			// Try to create config file and watch it
-			// Ignore errors in here otherwise there's no escape
+			// Ignore errors in here it's just a best effort
 			log.Println("Config file not found, creating empty file and watching")
 
 			_ = os.WriteFile(config.GetPath(), []byte(""), 0600)
