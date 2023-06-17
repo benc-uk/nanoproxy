@@ -4,13 +4,14 @@ metadata:
   name: {{ include "nanoproxy.fullname" . }}
   labels:
     {{- include "nanoproxy.labels" . | nindent 4 }}
-spec:
+spec: 
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: http
-      protocol: TCP
-      name: http
+      protocol: TCP 
+      name: http 
   loadBalancerIP: {{ .Values.service.loadBalancerIP }}
   selector:
     {{- include "nanoproxy.selectorLabels" . | nindent 4 }}
+  

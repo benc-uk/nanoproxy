@@ -6,5 +6,19 @@
   },
   "[yaml]": {
     "editor.formatOnSave": true
+  },
+  "[helm]": {
+    // Stop prettier from mangling helm templates!
+    "editor.formatOnSave": false
+  },
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "editor.defaultFormatter": "golang.go"
+  },
+  "gopls": {
+    "ui.semanticTokens": true
   }
 }
