@@ -1,10 +1,12 @@
-Second release, gosh wow.
+Third release, gosh
 
 Adds:
 
-- Health endpoint to proxy
-- A Helm chart for deployment
+- FEATURE: Support for TLS & HTTPS on the proxy
+- DOCS: Sizable readme updates
+- INTERNAL: Much internal refactoring and support for unit tests
+- INTERNAL: Lots of linting
 
 Removes:
 
-- Leader election in controller, it's not required
+- Nothing
