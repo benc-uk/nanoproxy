@@ -63,7 +63,7 @@ func TestProxyPathRule200(t *testing.T) {
 
 	nanoProxy.processConfig(conf, timeout)
 
-	request, _ := http.NewRequest(http.MethodGet, "/api", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/apisss", nil)
 	response := httptest.NewRecorder()
 
 	nanoProxy.mainHandler(response, request)

@@ -37,6 +37,16 @@ jobs:
       - name: Run tests
         run: make test
 
+      - name: Test report
+        if: always()
+        uses: robherley/go-test-action@v0.1.0
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: output/coverage.html
+
       - name: Run build
         run: make build
 

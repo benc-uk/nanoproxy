@@ -10,3 +10,4 @@ myvalues.yaml
 !.env.sample
 certs/
 coverage.*
+output/**

@@ -69,15 +69,17 @@ run-ctrl: ## 👟 Run controller locally with hot-reload
 
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true
-	@go test ./... -v -coverprofile=coverage.txt
-	@go tool cover -html=coverage.txt -o coverage.html
+	@mkdir -p output
+	@go test -json ./... > output/test.json || true
+	@go test ./... -v -coverprofile=output/coverage.txt
+	@go tool cover -html=output/coverage.txt -o output/coverage.html
 	@echo -e "\n📝 Coverage summary:"
-	@go tool cover -func=coverage.txt
-	@echo -e "\n📃 Coverage report written to: ./coverage.html"
+	@go tool cover -func=output/coverage.txt
+	@echo -e "\n📃 Coverage report written to: ./output/coverage.html"
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true
-	@rm -rf bin .tools tmp
+	@rm -rf bin tmp coverage.* config.yaml
 
 release: ## 🚀 Release a new version on GitHub
 	@figlet $@ || true
