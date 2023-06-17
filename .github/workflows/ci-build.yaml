@@ -34,10 +34,10 @@ jobs:
       - name: Run linting
         run: make lint
 
-      - name: Run tests
-        run: make test
+      # - name: Run tests
+      #   run: make test
 
-      - name: Test report
+      - name: Run tests
         if: always()
         uses: robherley/go-test-action@v0.1.0
 
