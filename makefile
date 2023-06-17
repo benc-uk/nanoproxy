@@ -36,12 +36,12 @@ install-tools: ## 🔮 Install dev tools into project bin directory
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
 	$(GOLINT_PATH) run --timeout 3m
-	npx prettier --check . '!deploy/helm/nanoproxy/templates/**'
+	npx prettier --check .
 
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
 	$(GOLINT_PATH) run --fix
-	npx prettier --write . '!deploy/helm/nanoproxy/templates/**'
+	npx prettier --write .
 
 build: ## 🔨 Build binary into ./bin/ directory
 	@figlet $@ || true

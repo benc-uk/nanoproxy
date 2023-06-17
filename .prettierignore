@@ -1,0 +1,3 @@
+coverage.*
+config.yaml
+**/templates/**/*.yaml

@@ -56,10 +56,12 @@ func TestConfigEmpty(t *testing.T) {
 		t.Errorf("Expected no error loading config, got %v", err)
 	}
 
+	//nolint:staticcheck
 	if conf == nil {
 		t.Errorf("Expected non-nil config, got nil")
 	}
 
+	//nolint:staticcheck
 	if len(conf.Rules) != 0 {
 		t.Errorf("Expected empty rules, got %+v", conf.Rules)
 	}
@@ -90,10 +92,12 @@ func TestConfigValid(t *testing.T) {
 		t.Errorf("Expected no error loading config, got %v", err)
 	}
 
+	//nolint:staticcheck
 	if conf == nil {
 		t.Errorf("Expected non-nil config, got nil")
 	}
 
+	//nolint:staticcheck
 	if len(conf.Rules) != 2 {
 		t.Errorf("Expected 2 rules, got %+v", conf.Rules)
 	}
