@@ -64,6 +64,7 @@ ghcr.io/benc-uk/nanoproxy-proxy:latest
 ```
 
 ## 🎯 Ingress Controller
+
 The ingress controller (or just controller) works by listening to the Kubernetes API and watching for `Ingress`
 resources. It then reconciles each `Ingress` using an in memory cache (simply a map keyed on namespace & name) and the
 following logic:
@@ -149,15 +150,14 @@ rules:
 
 ## ⚙️ Environmental Variables
 
-- `CONF_FILE`: This is used by both the proxy and the controller to set the path of the config file used.
-- `TIMEOUT`: Connection and HTTP timeout used by the proxy.
-- `PORT`: Port the proxy will listen on, also on controller for it's webhook listener which isn't used
-- `DEBUG`: Set to non-blank, for extra logging and output from the proxy. Also enables the special config endpoint (see
-  below)
-- `CERT_PATH`: Set to a directory where `cert.pem` and `key.pem` are expected to reside, this will enable TLS and HTTPS
-  on the proxy server.
-- `TLS_SKIP_VERIFY`: Used when calling a HTTPS upstream, if this var is set to anything (e.g. "1") this will skip the
-  normal TLS cert validation for all upstreams.
+| Env Var           | Description                                                                                                                                    | Default |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `CONF_FILE`       | Used by both the proxy and the controller, path of the config file used.                                                                       | _None_  |
+| `TIMEOUT`         | Connection and HTTP timeout in seconds. Proxy only.                                                                                            | 5       |
+| `PORT`            | Port the proxy will listen and accept traffic on.                                                                                              | 8080    |
+| `DEBUG`           | For extra logging and output from the proxy, set to non-blank value (e.g. "1"). Also enables the special config endpoint (see below).          | _None_  |
+| `CERT_PATH`       | Set to a directory where `cert.pem` and `key.pem` reside, this will enable TLS and HTTPS on the proxy server.                                  | _None_  |
+| `TLS_SKIP_VERIFY` | Used when calling a HTTPS upstream, if this var is set to anything (e.g. "1") this will skip the normal TLS cert validation for all upstreams. | _None_  |
 
 ## 🤖 Notes on proxy
 

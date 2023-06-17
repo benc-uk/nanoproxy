@@ -140,17 +140,31 @@ func main() {
 		},
 	}
 
-	log.Println("Server listening on port: " + port)
-
+	useTLS := false
 	if certPath != "" {
-		log.Printf("Using TLS, loading cert & key from: %s %s", certPath+"/cert.pem", certPath+"/key.pem")
-		log.Println("Server will only accept HTTPS traffic")
+		log.Printf("Checking cert & key files: %s %s", certPath+"/cert.pem", certPath+"/key.pem")
+		useTLS = true
 
+		// Check cert & key files exist
+		if _, err := os.Stat(certPath + "/cert.pem"); os.IsNotExist(err) {
+			log.Printf("ERROR! Cert file not found: " + certPath + "/cert.pem")
+			useTLS = false
+		}
+
+		if _, err := os.Stat(certPath + "/key.pem"); os.IsNotExist(err) {
+			log.Printf("ERROR! Key file not found: " + certPath + "/key.pem")
+			useTLS = false
+		}
+	}
+
+	if useTLS {
+		log.Println("TLS has been enabled, proxy will accept HTTPS traffic on port: " + port)
 		err = server.ListenAndServeTLS(certPath+"/cert.pem", certPath+"/key.pem")
 		if err != nil {
 			panic(err)
 		}
 	} else {
+		log.Println("TLS is disabled, proxy will accept HTTP traffic on port: " + port)
 		err = server.ListenAndServe()
 		if err != nil {
 			panic(err)
