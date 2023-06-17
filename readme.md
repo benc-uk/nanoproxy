@@ -64,6 +64,7 @@ ghcr.io/benc-uk/nanoproxy-proxy:latest
 ```
 
 ## 🎯 Ingress Controller
+
 The ingress controller (or just controller) works by listening to the Kubernetes API and watching for `Ingress`
 resources. It then reconciles each `Ingress` using an in memory cache (simply a map keyed on namespace & name) and the
 following logic:
