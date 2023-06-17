@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: nanoproxy
-          image: ghcr.io/benc-uk/nanoproxy-proxy:latest 
+          image: ghcr.io/benc-uk/nanoproxy-proxy:latest
           imagePullPolicy: Always
           env:
             - name: CONF_FILE

@@ -1,3 +1,10 @@
 {
-  "go.lintTool": "revive"
+  "go.lintTool": "revive",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[markdown]": {
+    "editor.formatOnSave": true
+  },
+  "[yaml]": {
+    "editor.formatOnSave": true
+  }
 }

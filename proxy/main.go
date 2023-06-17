@@ -111,7 +111,7 @@ func main() {
 		}
 	}
 
-	// Process loaded config file
+	// Try to load and process config
 	nanoProxy.processConfig(timeout)
 
 	// All requests flow through this main handler

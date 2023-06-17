@@ -5,11 +5,11 @@
 
 linters:
   enable:
-    - revive      # Replacement for golint
-    - gofmt       # Runs gofmt as part of the linter
-    - gosec       # Find security issues
-    - wsl         # Whitespace linter
-    - misspell    # Find misspelled words
+    - revive # Replacement for golint
+    - gofmt # Runs gofmt as part of the linter
+    - gosec # Find security issues
+    - wsl # Whitespace linter
+    - misspell # Find misspelled words
 
 linters-settings:
   misspell:
@@ -24,7 +24,7 @@ linters-settings:
         yaml: goCamel
 
   revive:
-    severity: error 
+    severity: error
     enable-all-rules: false
     confidence: 0.5
     rules:
@@ -35,4 +35,4 @@ linters-settings:
         severity: error
         arguments: [120]
       - name: var-naming
-        severity: error        
+        severity: error

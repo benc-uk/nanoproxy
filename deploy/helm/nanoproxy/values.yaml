@@ -34,18 +34,20 @@ serviceAccount:
   # -- Annotations to add to the service account
   annotations: {}
   # -- The name of service account to use.
-  # If not set and create is true, name is generated 
+  # If not set and create is true, name is generated
   name: ""
 
 # -- Pod annotations
 podAnnotations: {}
 
 # -- Security context for the pods
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # fsGroup: 2000
 
 # -- Security context for the containers
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -61,9 +63,9 @@ service:
   port: 80
 
   # -- Use an existing IP address for the service
-  loadBalancerIP: 
+  loadBalancerIP:
 
-resources: 
+resources:
   limits:
     # -- CPU resource limits
     cpu: 200m

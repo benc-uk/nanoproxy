@@ -1,10 +1,10 @@
-version: '3'
+version: "3"
 
 includes:
-  containers: 
+  containers:
     taskfile: ../project-starter/.taskfiles/containers.yaml
     internal: true
-  utils: 
+  utils:
     taskfile: ../project-starter/.taskfiles/utils.yaml
     internal: true
 
@@ -14,7 +14,7 @@ vars:
   TOOLS_DIR: ./.tools
 
 # Look for per-environment .env files, and fall back to .env
-dotenv: ['.env.{{.ENV}}', '.env']
+dotenv: [".env.{{.ENV}}", ".env"]
 
 tasks:
   default:
@@ -25,11 +25,12 @@ tasks:
   dev-tools:
     desc: Install dev tools into project directory
     cmds:
-      - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b {{.TOOLS_DIR}}
+      - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b
+        {{.TOOLS_DIR}}
       - wget https://github.com/cosmtrek/air/releases/download/v1.42.0/air_1.42.0_linux_amd64 -q -O {{.TOOLS_DIR}}/air
-      - chmod +x {{.TOOLS_DIR}}/* 
+      - chmod +x {{.TOOLS_DIR}}/*
     status:
-      - test -f {{.TOOLS_DIR}}/air 
+      - test -f {{.TOOLS_DIR}}/air
       - test -f {{.TOOLS_DIR}}/golangci-lint
 
   lint:
@@ -85,5 +86,3 @@ tasks:
     desc: Clean up, remove temp files and tools
     cmds:
       - rm -rf ./bin ./tmp ./.tools
-
-  
