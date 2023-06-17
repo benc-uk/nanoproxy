@@ -59,17 +59,21 @@ push: check-vars ## 📤 Push container images
 	docker push $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG)
 	docker push $(IMAGE_REG)/$(IMAGE_NAME)-controller:$(IMAGE_TAG)
 
-run-proxy: ## 🌐 Run proxy locally with hot-reload
+run-proxy: ## 👟 Run proxy locally with hot-reload
 	@figlet $@ || true
 	@$(AIR_PATH) -c proxy/.air.toml
 
-run-ctrl: ## 🤖 Run controller locally with hot-reload
+run-ctrl: ## 👟 Run controller locally with hot-reload
 	@figlet $@ || true
 	@$(AIR_PATH) -c controller/.air.toml
 
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true
-	@echo "Not implemented yet! 😵"
+	@go test ./... -v -coverprofile=coverage.txt
+	@go tool cover -html=coverage.txt -o coverage.html
+	@echo -e "\n📝 Coverage summary:"
+	@go tool cover -func=coverage.txt
+	@echo -e "\n📃 Coverage report written to: ./coverage.html"
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true

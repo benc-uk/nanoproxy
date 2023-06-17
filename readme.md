@@ -164,7 +164,7 @@ rules:
 The proxy exposes two routes of it's own:
 
 - `/.nanoproxy/health` Used for health checks
-- `/.nanoproxy/config` Dumps the in memory config, only enabled when DEBUG is set
+- `/.nanoproxy/config` Dumps the in memory config, this endpoint is only enabled when DEBUG is set
 
 The proxy applies the following logic to incoming requests to decide how to route them:
 
@@ -195,17 +195,20 @@ Then use `make run-proxy` or `make run-ctrl` to run either or both locally.
 
 ```
 $ make
-help                 💬 This help message :)
-install-tools        🔮 Install dev tools into project bin directory
-lint                 🔍 Lint & format check only, sets exit code on error for CI
-lint-fix             📝 Lint & format, attempts to fix errors & modify code
 build                🔨 Build binary into ./bin/ directory
-images               📦 Build container images
-push                 📤 Push container images
-run-proxy            🌐 Run proxy locally with hot-reload
-run-ctrl             🤖 Run controller locally with hot-reload
-test                 🧪 Run all unit tests
 clean                🧹 Clean up, remove dev data and files
+helm-package         🔠 Package Helm chart and update index
+help                 💬 This help message :)
+images               📦 Build container images
+install-tools        🔮 Install dev tools into project bin directory
+lint-fix             📝 Lint & format, attempts to fix errors & modify code
+lint                 🔍 Lint & format check only, sets exit code on error for CI
+print-env            🚿 Print all env vars for debugging
+push                 📤 Push container images
+release              🚀 Release a new version on GitHub
+run-ctrl             👟 Run controller locally with hot-reload
+run-proxy            👟 Run proxy locally with hot-reload
+test                 🧪 Run all unit tests
 ```
 
 ### Repo Index

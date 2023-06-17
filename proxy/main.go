@@ -23,7 +23,8 @@ var version = "0.0.0"
 
 type NanoProxy struct {
 	proxies map[string]*httputil.ReverseProxy
-	config  config.Config
+	config  config.Config  // Hold a copy of the config
+	mux     *http.ServeMux // Hold a reference to the mux for testing
 }
 
 func main() {
@@ -82,8 +83,16 @@ func main() {
 					// Eurgh, see https://github.com/fsnotify/fsnotify/issues/372
 					time.Sleep(200 * time.Millisecond)
 
+					configData, err := config.Load()
+					if err != nil {
+						log.Println("Warning: no config file, proxy will do nothing")
+
+						// Create empty config, so we don't panic later
+						configData = &config.Config{}
+					}
+
 					// Update & process new config
-					nanoProxy.processConfig(timeout)
+					nanoProxy.processConfig(*configData, timeout)
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
@@ -111,24 +120,24 @@ func main() {
 		}
 	}
 
-	// Try to load and process config
-	nanoProxy.processConfig(timeout)
+	// Must be called before any config is loaded
+	config.Setup()
 
-	// All requests flow through this main handler
-	http.HandleFunc("/", nanoProxy.handle)
+	// Load config from file
+	configData, err := config.Load()
+	if err != nil {
+		log.Println("Warning: no config file, proxy will do nothing")
 
-	if os.Getenv("DEBUG") != "" {
-		log.Println("Debug enabled, exposing /.nanoproxy/config endpoint")
-
-		http.HandleFunc("/.nanoproxy/config", func(w http.ResponseWriter, r *http.Request) {
-			_, _ = w.Write([]byte(nanoProxy.config.Dump()))
-		})
+		// Create empty config, so we don't panic later
+		configData = &config.Config{}
 	}
 
-	// Add health check endpoint, weird name to try to avoid clashes
-	http.HandleFunc("/.nanoproxy/health", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("OK"))
-	})
+	nanoProxy.processConfig(*configData, timeout)
+	nanoProxy.start(port, timeout, certPath)
+}
+
+func (np *NanoProxy) start(port string, timeout time.Duration, certPath string) {
+	np.addRoutes()
 
 	server := &http.Server{
 		Addr:         ":" + port,
@@ -138,6 +147,7 @@ func main() {
 			MinVersion: tls.VersionTLS12,
 			MaxVersion: tls.VersionTLS13,
 		},
+		Handler: np.mux,
 	}
 
 	useTLS := false
@@ -159,38 +169,50 @@ func main() {
 
 	if useTLS {
 		log.Println("TLS has been enabled, proxy will accept HTTPS traffic on port: " + port)
-		err = server.ListenAndServeTLS(certPath+"/cert.pem", certPath+"/key.pem")
+		err := server.ListenAndServeTLS(certPath+"/cert.pem", certPath+"/key.pem")
 		if err != nil {
 			panic(err)
 		}
 	} else {
 		log.Println("TLS is disabled, proxy will accept HTTP traffic on port: " + port)
-		err = server.ListenAndServe()
+		err := server.ListenAndServe()
 		if err != nil {
 			panic(err)
 		}
 	}
 }
 
-// This loads config and creates the reverse proxies
-func (np *NanoProxy) processConfig(timeout time.Duration) {
-	// Load config from file
-	configData, err := config.Load()
-	if err != nil {
-		log.Println("Warning: no config file, proxy will do nothing")
+func (np *NanoProxy) addRoutes() {
+	mux := http.NewServeMux()
 
-		// Create empty config, so we don't panic later
-		configData = &config.Config{}
+	// All requests flow through this main handler
+	mux.HandleFunc("/", np.mainHandler)
+
+	if os.Getenv("DEBUG") != "" {
+		log.Println("Debug enabled, exposing /.nanoproxy/config endpoint")
+
+		mux.HandleFunc("/.nanoproxy/config", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte(np.config.Dump()))
+		})
 	}
 
-	np.config = *configData
+	// Add health check endpoint, weird name to try to avoid clashes
+	mux.HandleFunc("/.nanoproxy/health", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("OK"))
+	})
 
+	// Set the mux to our new one
+	np.mux = mux
+}
+
+// This loads config and creates the reverse proxies
+func (np *NanoProxy) processConfig(config config.Config, timeout time.Duration) {
 	// This is the map of reverse proxies, keyed by upstream name
 	np.proxies = make(map[string]*httputil.ReverseProxy)
 
 	// Construct reverse proxies for each upstream
 	// Note the term upstream is used in the config file, but we call them proxies here
-	for _, u := range np.config.Upstreams {
+	for _, u := range config.Upstreams {
 		scheme := u.Scheme
 		if scheme == "" {
 			scheme = "http"
@@ -219,7 +241,7 @@ func (np *NanoProxy) processConfig(timeout time.Duration) {
 	}
 
 	// Validate & check rules
-	for _, rule := range np.config.Rules {
+	for _, rule := range config.Rules {
 		if !(rule.MatchMode == "" || rule.MatchMode == "prefix" || rule.MatchMode == "exact") {
 			log.Printf("Rule error: invalid match mode: %s", rule.MatchMode)
 			continue
@@ -231,17 +253,20 @@ func (np *NanoProxy) processConfig(timeout time.Duration) {
 		}
 	}
 
-	if len(np.config.Rules) <= 0 {
+	if len(config.Rules) <= 0 {
 		log.Printf("Warning: config contains no rules")
 	}
 
 	if len(np.proxies) <= 0 {
 		log.Printf("Warning: config contains no upstreams")
 	}
+
+	// Save config
+	np.config = config
 }
 
 // This is the main router for all proxied requests
-func (np *NanoProxy) handle(w http.ResponseWriter, r *http.Request) {
+func (np *NanoProxy) mainHandler(w http.ResponseWriter, r *http.Request) {
 	if os.Getenv("DEBUG") != "" {
 		log.Println("Request received: " + r.URL.String())
 	}
