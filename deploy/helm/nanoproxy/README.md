@@ -1,8 +1,8 @@
 # nanoproxy
 
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square)
+![Version: 0.0.3](https://img.shields.io/badge/Version-0.0.3-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
-![AppVersion: 0.0.2](https://img.shields.io/badge/AppVersion-0.0.2-informational?style=flat-square)
+![AppVersion: 0.0.3](https://img.shields.io/badge/AppVersion-0.0.3-informational?style=flat-square)
 
 NanoProxy ingress controller
 
@@ -28,9 +28,11 @@ NanoProxy ingress controller
 | resources.limits.memory    | string | `"128Mi"`                     | Memory resource limits                                                                                                                 |
 | securityContext            | object | `{}`                          | Security context for the containers                                                                                                    |
 | service.loadBalancerIP     | string | `nil`                         | Use an existing IP address for the service                                                                                             |
-| service.port               | int    | `80`                          | Port to expose on the service                                                                                                          |
+| service.port               | int    | `80`                          | Port to expose on the service, change to 443 if using TLS                                                                              |
 | service.type               | string | `"LoadBalancer"`              | Type of service to create                                                                                                              |
 | serviceAccount.annotations | object | `{}`                          | Annotations to add to the service account                                                                                              |
 | serviceAccount.create      | bool   | `true`                        | Specifies whether a service account should be created This will also create ClusterRole and ClusterRoleBinding for the service account |
 | serviceAccount.name        | string | `""`                          | The name of service account to use. If not set and create is true, name is generated                                                   |
+| tls.enabled                | bool   | `false`                       | Enable TLS on the proxy                                                                                                                |
+| tls.secretName             | string | `""`                          | TLS secret name, must be set if enabled is true                                                                                        |
 | tolerations                | list   | `[]`                          | Tolerations for pod assignment                                                                                                         |

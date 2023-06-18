@@ -94,3 +94,4 @@ helm-package: ## 🔠 Package Helm chart and update index
 	helm-docs --chart-search-root deploy/helm
 	helm package deploy/helm/nanoproxy -d deploy/helm
 	helm repo index deploy/helm
+	make lint-fix

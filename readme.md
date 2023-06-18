@@ -4,7 +4,7 @@
 
 NanoProxy is a simple HTTP reverse proxy & Kubernetes ingress controller written in Go and based largely on
 [httputil.ReverseProxy](https://pkg.go.dev/net/http/httputil#ReverseProxy) in the Go standard library. It was designed
-for traffic routing and less for load balancing.
+for traffic routing (like an API gateway) and less for load balancing.
 
 This was developed as a learning exercise only! If you want an ingress controller for your production Kubernetes cluster
 you [should look elsewhere](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
@@ -19,7 +19,7 @@ Features:
 - Preserves the host header for the upstream requests, like
   [any good reverse proxy should](https://learn.microsoft.com/en-us/azure/architecture/best-practices/host-name-preservation).
 - The headers `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto` are set on the upstream request.
-- TODO: TLS support & termination.
+- HTTPS support with TLS termination.
 
 ### Container Images
 
@@ -163,7 +163,7 @@ rules:
 
 The proxy exposes two routes of it's own:
 
-- `/.nanoproxy/health` Used for health checks
+- `/.nanoproxy/health` Returns HTTP 200 OK. Used for health checks, and probes
 - `/.nanoproxy/config` Dumps the in memory config, this endpoint is only enabled when DEBUG is set
 
 The proxy applies the following logic to incoming requests to decide how to route them:

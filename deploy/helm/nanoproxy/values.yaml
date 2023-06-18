@@ -10,6 +10,12 @@ ingressClass:
 # -- Turn on debug logging in the proxy
 debug: ""
 
+tls:
+  # -- Enable TLS on the proxy
+  enabled: false
+  # -- TLS secret name, must be set if enabled is true
+  secretName: ""
+
 image:
   # -- Prefix for the image repository, '-proxy' and '-controller' will be appended
   prefix: ghcr.io/benc-uk/nanoproxy
@@ -59,7 +65,7 @@ service:
   # -- Type of service to create
   type: LoadBalancer
 
-  # -- Port to expose on the service
+  # -- Port to expose on the service, change to 443 if using TLS
   port: 80
 
   # -- Use an existing IP address for the service
