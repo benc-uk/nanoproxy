@@ -15,6 +15,8 @@ env:
   # Note the version and image tag are the same
   IMAGE_TAG: ${{ github.event.release.tag_name || github.event.inputs.version }}
   VERSION: ${{ github.event.release.tag_name || github.event.inputs.version }}
+  IMAGE_REG: ghcr.io
+  IMAGE_NAME: benc-uk/nanoproxy
 
 permissions:
   packages: write
@@ -23,9 +25,6 @@ jobs:
   image-build:
     name: Build and push images
     runs-on: ubuntu-latest
-    env:
-      IMAGE_REG: ghcr.io
-      IMAGE_NAME: benc-uk/nanoproxy
 
     steps:
       - uses: actions/checkout@v3
@@ -40,13 +39,11 @@ jobs:
           echo IMAGE_TAG: $IMAGE_TAG
           echo BUILD_INFO: $BUILD_INFO
 
-      - name: Build images
-        run: make images
+      - name: Login to GitHub Container Registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
 
-      - name: Push images
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
-          make push
+      - name: Build & push images
+        run: make images push
 
       # We make `latest` tag point to the same version
       - name: Build & push latest
