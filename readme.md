@@ -166,6 +166,12 @@ The proxy exposes two routes of it's own:
 - `/.nanoproxy/health` Returns HTTP 200 OK. Used for health checks, and probes
 - `/.nanoproxy/config` Dumps the in memory config, this endpoint is only enabled when DEBUG is set
 
+The proxy accepts plain HTTP requests by default, but will route to upstream services using HTTPS if requested. If you
+want to accept incoming HTTPS traffic on the proxy and terminate TLS there, you will need a certificate and a key.
+Generation of these is far outside the scope of this readme. They should be in PEM format and be placed together in the
+same directory named `cert.pem` and `key.pem`, then the `CERT_PATH` should be set to point to this directory. Doing this
+will enable TLS.
+
 The proxy applies the following logic to incoming requests to decide how to route them:
 
 - Get hostname from incoming request
@@ -215,12 +221,15 @@ test                 🧪 Run all unit tests
 
 ```text
 📂
-├── build         - Docker build files
+├── build           - Dockerfiles
+├── controller      - Source code for ingress controller
 ├── deploy
-│   ├─ manifests  - Kubernetes manifests to deploy as ingress controller
-│   └─ helm       - Helm chart to deploy as ingress controller
-├── ingress-ctrl  - Source code of the ingress controller
-├── pkg           - Shared packages between proxy and controller
-├── proxy         - Source code of the reverse proxy
-└── samples       - Samples and examples
+│   ├── helm        - Helm chart
+│   └── kubernetes  - Basic Kubernetes manifest
+├── docs            - Docs and supporting images
+├── experiments     - Random stuff
+├── pkg
+│   └── config      - Source code for shared config package
+├── proxy           - Source code of proxy
+└── samples         - Some samples
 ```
