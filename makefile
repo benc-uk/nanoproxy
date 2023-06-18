@@ -1,23 +1,32 @@
-# Override these if building your own images
-VERSION ?= 0.0.2
-IMAGE_REG ?= ghcr.io
-IMAGE_NAME ?= benc-uk/nanoproxy
-IMAGE_TAG ?= latest
+# Set ENV to dev, prod, etc. to load .env.$(ENV) file
+ENV ?= 
+-include .env
+export
+-include .env.$(ENV)
+export
 
-# Things you don't want to change
+# Internal variables you don't want to change
+SHELL := /bin/bash
+MAKEFLAGS += --warn-undefined-variables --no-builtin-rules
 REPO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-
-# Tools installed locally into repo, don't change
 GOLINT_PATH := $(REPO_DIR)/.tools/golangci-lint
 AIR_PATH := $(REPO_DIR)/.tools/air
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: help images push lint lint-fix install-tools run-proxy run-ctrl release test build
+.PHONY: help images push lint lint-fix install-tools run-proxy run-ctrl release test build check-vars
 .DEFAULT_GOAL := help
+
+print-env: ## 🚿 Print all env vars for debugging
+	@figlet $@ || true
+	@echo "Environment: ${ENV}"
+	@echo "VERSION: $(VERSION)"
+	@echo "IMAGE_REG: $(IMAGE_REG)"
+	@echo "IMAGE_NAME: $(IMAGE_NAME)"
+	@echo "IMAGE_TAG: $(IMAGE_TAG)"
 
 help: ## 💬 This help message :)
 	@figlet $@ || true
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 install-tools: ## 🔮 Install dev tools into project bin directory
 	@figlet $@ || true
@@ -27,10 +36,12 @@ install-tools: ## 🔮 Install dev tools into project bin directory
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
 	$(GOLINT_PATH) run --timeout 3m
+	npx prettier --check .
 
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
 	$(GOLINT_PATH) run --fix
+	npx prettier --write .
 
 build: ## 🔨 Build binary into ./bin/ directory
 	@figlet $@ || true
@@ -38,44 +49,49 @@ build: ## 🔨 Build binary into ./bin/ directory
 	@go build -o bin/nanoproxy ./proxy
 	@go build -o bin/controller ./controller
 
-images: ## 📦 Build container images
+images: check-vars ## 📦 Build container images
 	@figlet $@ || true
 	docker build . -f build/Dockerfile.proxy -t $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG) --build-arg VERSION=$(VERSION)
 	docker build . -f build/Dockerfile.controller -t $(IMAGE_REG)/$(IMAGE_NAME)-controller:$(IMAGE_TAG) --build-arg VERSION=$(VERSION)
 
-push: ## 📤 Push container images
+push: check-vars ## 📤 Push container images
 	@figlet $@ || true
 	docker push $(IMAGE_REG)/$(IMAGE_NAME)-proxy:$(IMAGE_TAG)
 	docker push $(IMAGE_REG)/$(IMAGE_NAME)-controller:$(IMAGE_TAG)
 
-run-proxy: ## 🌐 Run proxy locally with hot-reload
+run-proxy: ## 👟 Run proxy locally with hot-reload
 	@figlet $@ || true
 	@$(AIR_PATH) -c proxy/.air.toml
 
-run-ctrl: ## 🤖 Run controller locally with hot-reload
+run-ctrl: ## 👟 Run controller locally with hot-reload
 	@figlet $@ || true
 	@$(AIR_PATH) -c controller/.air.toml
 
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true
-	@echo "Not implemented yet! 😵"
+	@mkdir -p output
+	@go test -json ./... > output/test.json || true
+	@go test ./... -v -coverprofile=output/coverage.txt
+	@go tool cover -html=output/coverage.txt -o output/coverage.html
+	@echo -e "\n📝 Coverage summary:"
+	@go tool cover -func=output/coverage.txt
+	@echo -e "\n📃 Coverage report written to: ./output/coverage.html"
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true
-	@rm -rf bin
-	@rm -rf .tools
-	@rm -rf tmp
+	@rm -rf bin tmp coverage.* config.yaml
 
-release: ## 🚀 Create a release, builds and pushes images
+release: ## 🚀 Release a new version on GitHub
 	@figlet $@ || true
-	@echo "Releasing version $(VERSION) on GitHub"
+	@echo "💢 Releasing version $(VERSION) on GitHub"
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	gh release create "$(VERSION)" --title "v$(VERSION)" \
 	--notes-file docs/release-notes.md \
 	--latest 
 
-helm-package:
+helm-package: ## 🔠 Package Helm chart and update index
 	@figlet $@ || true
 	helm-docs --chart-search-root deploy/helm
 	helm package deploy/helm/nanoproxy -d deploy/helm
 	helm repo index deploy/helm
+	make lint-fix

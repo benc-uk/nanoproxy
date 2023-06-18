@@ -5,3 +5,9 @@ tmp/
 !/samples/**
 config.yaml
 myvalues.yaml
+.env
+.env.*
+!.env.sample
+certs/
+coverage.*
+output/**

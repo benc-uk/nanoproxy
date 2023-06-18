@@ -10,6 +10,12 @@ ingressClass:
 # -- Turn on debug logging in the proxy
 debug: ""
 
+tls:
+  # -- Enable TLS on the proxy
+  enabled: false
+  # -- TLS secret name, must be set if enabled is true
+  secretName: ""
+
 image:
   # -- Prefix for the image repository, '-proxy' and '-controller' will be appended
   prefix: ghcr.io/benc-uk/nanoproxy
@@ -34,18 +40,20 @@ serviceAccount:
   # -- Annotations to add to the service account
   annotations: {}
   # -- The name of service account to use.
-  # If not set and create is true, name is generated 
+  # If not set and create is true, name is generated
   name: ""
 
 # -- Pod annotations
 podAnnotations: {}
 
 # -- Security context for the pods
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # fsGroup: 2000
 
 # -- Security context for the containers
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -57,13 +65,13 @@ service:
   # -- Type of service to create
   type: LoadBalancer
 
-  # -- Port to expose on the service
+  # -- Port to expose on the service, change to 443 if using TLS
   port: 80
 
   # -- Use an existing IP address for the service
-  loadBalancerIP: 
+  loadBalancerIP:
 
-resources: 
+resources:
   limits:
     # -- CPU resource limits
     cpu: 200m

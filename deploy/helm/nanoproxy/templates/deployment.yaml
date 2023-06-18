@@ -36,6 +36,10 @@ spec:
               value: /conf/config.yaml    
             - name: DEBUG
               value: {{ quote .Values.debug }}   
+            {{- if .Values.tls.enabled }}
+            - name: CERT_PATH
+              value: /certs
+            {{- end }}
           ports:
             - name: http
               containerPort: 8080
@@ -44,11 +48,19 @@ spec:
             httpGet:
               path: /.nanoproxy/health
               port: http
+              {{- if .Values.tls.enabled }}
+              scheme: HTTPS
+              {{- end }}
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /conf/
-              name: conf-volume 
+              name: conf-volume
+            {{- if .Values.tls.enabled }}
+            - mountPath: /certs/
+              name: cert-volume
+            {{- end }}
 
         - name: controller
           securityContext:
@@ -68,6 +80,16 @@ spec:
         - name: conf-volume
           emptyDir:
             medium: Memory
+        {{- if .Values.tls.enabled }}
+        - name: cert-volume
+          secret:
+            secretName: {{ .Values.tls.secretName }}
+            items:
+              - key: tls.crt
+                path: cert.pem
+              - key: tls.key
+                path: key.pem
+        {{- end }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:

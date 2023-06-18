@@ -2,15 +2,18 @@
 
 Hello! Thanks for taking an interest in this project and code :)
 
-Contributions to this project are welcome of course, otherwise it wouldn't reside on GitHub 😃 however there's a few things to be aware of:
+Contributions to this project are welcome of course, otherwise it wouldn't reside on GitHub 😃 however there's a few
+things to be aware of:
 
 - This is a personal project, it is not maintained by a team or group.
-- It might take a long time for the maintainer(s) to reply to issues or review PRs, they will have have a day jobs & might not have looked at the code for a while.
+- It might take a long time for the maintainer(s) to reply to issues or review PRs, they will have have a day jobs &
+  might not have looked at the code for a while.
 - The code here is likely to not be bullet proof & production grade.
 
 # Contributing
 
-There's several ways of contributing to this project, and effort has been made to make this as easy and transparent as possible, whether it's:
+There's several ways of contributing to this project, and effort has been made to make this as easy and transparent as
+possible, whether it's:
 
 - Reporting a bug
 - Discussing the current state of the code
@@ -20,7 +23,8 @@ There's several ways of contributing to this project, and effort has been made t
 
 ## All code changes happen though pull requests (PRs)
 
-Pull requests are the best way to propose changes to the codebase (using the standard [Github Flow](https://guides.github.com/introduction/flow/index.html)).
+Pull requests are the best way to propose changes to the codebase (using the standard
+[Github Flow](https://guides.github.com/introduction/flow/index.html)).
 
 Some PR guidance:
 
@@ -36,7 +40,8 @@ High level steps:
 
 ## Any contributions you make will be under the MIT Software License
 
-In short, when you submit code changes, your submissions are understood to be under the same [MIT License](http://choosealicense.com/licenses/mit/) that covers this project.
+In short, when you submit code changes, your submissions are understood to be under the same
+[MIT License](http://choosealicense.com/licenses/mit/) that covers this project.
 
 ## Report bugs using Github's issues
 
@@ -60,4 +65,5 @@ Run `make lint-fix` in order to format the code fix any formatting & linting iss
 
 # References
 
-This document was heavily adapted from the open-source contribution guidelines found in [this gist](https://gist.github.com/briandk/3d2e8b3ec8daf5a27a62)
+This document was heavily adapted from the open-source contribution guidelines found in
+[this gist](https://gist.github.com/briandk/3d2e8b3ec8daf5a27a62)

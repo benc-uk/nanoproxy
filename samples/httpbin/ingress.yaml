@@ -9,13 +9,13 @@ metadata:
 spec:
   ingressClassName: nanoproxy
   rules:
-  - host: ""
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/httpbin"
-        backend:
-          service:
-            name: httpbin
-            port: 
-              number: 80
+    - host: ""
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/httpbin"
+            backend:
+              service:
+                name: httpbin
+                port:
+                  number: 80

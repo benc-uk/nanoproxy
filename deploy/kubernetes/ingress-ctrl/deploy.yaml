@@ -1,7 +1,7 @@
-apiVersion: apps/v1 
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nanoproxy 
+  name: nanoproxy
 spec:
   selector:
     matchLabels:
@@ -14,7 +14,7 @@ spec:
       serviceAccount: nanoproxy
       containers:
         - name: proxy
-          image: ghcr.io/benc-uk/nanoproxy-proxy:latest 
+          image: ghcr.io/benc-uk/nanoproxy-proxy:latest
           imagePullPolicy: Always
           env:
             - name: CONF_FILE
@@ -34,7 +34,7 @@ spec:
               name: conf-volume
 
         - name: controller
-          image: ghcr.io/benc-uk/nanoproxy-controller:latest 
+          image: ghcr.io/benc-uk/nanoproxy-controller:latest
           imagePullPolicy: Always
           env:
             - name: CONF_FILE
@@ -45,8 +45,8 @@ spec:
               cpu: "1"
           volumeMounts:
             - mountPath: /conf/
-              name: conf-volume 
-              
+              name: conf-volume
+
       volumes:
         - name: conf-volume
           emptyDir:
