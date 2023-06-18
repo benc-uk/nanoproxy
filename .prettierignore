@@ -1,3 +1,6 @@
-coverage.*
 config.yaml
 **/templates/**/*.yaml
+output/
+tmp/
+.tools/
+certs/

@@ -16,21 +16,22 @@ import (
 type NanoProxy struct {
 	proxies map[string]*httputil.ReverseProxy
 	config  *config.Config // Hold a copy of the config
-	mux     *http.ServeMux // Hold a reference to the mux for testing
 }
 
 func (np *NanoProxy) startServer(port string, timeout time.Duration, certPath string) {
-	np.addRoutes()
-
+	// Create a server with a timeout and our routes
 	server := &http.Server{
 		Addr:         ":" + port,
 		ReadTimeout:  timeout,
 		WriteTimeout: timeout,
+
 		TLSConfig: &tls.Config{
 			MinVersion: tls.VersionTLS12,
 			MaxVersion: tls.VersionTLS13,
 		},
-		Handler: np.mux,
+
+		// Important! Assign our routes
+		Handler: np.createRoutes(),
 	}
 
 	useTLS := false
@@ -73,7 +74,7 @@ func (np *NanoProxy) startServer(port string, timeout time.Duration, certPath st
 	}
 }
 
-func (np *NanoProxy) addRoutes() {
+func (np *NanoProxy) createRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// All requests flow through this main handler
@@ -92,8 +93,7 @@ func (np *NanoProxy) addRoutes() {
 		_, _ = w.Write([]byte("OK"))
 	})
 
-	// Set the mux to our new one
-	np.mux = mux
+	return mux
 }
 
 // This loads config and creates the reverse proxies

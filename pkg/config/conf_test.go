@@ -2,6 +2,7 @@ package config
 
 // Tests for config package
 import (
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -27,12 +28,18 @@ rules:
 `
 
 func TestMain(m *testing.M) {
+	// Use a temp file for config
 	os.Setenv("CONF_FILE", "/tmp/nanoproxy-config.yaml")
-	//Setup()
+
+	// Remove temp file
+	defer func() {
+		os.Remove(GetPath())
+	}()
+
+	// Disable logging
+	log.SetOutput(io.Discard)
 
 	m.Run()
-
-	os.Remove(GetPath())
 }
 
 // Test the config package
@@ -148,8 +155,6 @@ func TestConfigWrite(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected no error reading config, got %v", err)
 	}
-
-	log.Printf("Got config: %s", string(bytes))
 
 	if string(bytes) != conf.Dump() {
 		t.Errorf("Expected config to match, got %s", string(bytes))

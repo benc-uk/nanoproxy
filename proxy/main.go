@@ -107,9 +107,6 @@ func main() {
 		}
 	}
 
-	// Must be called before any config is loaded
-	//config.Setup()
-
 	// Load config from file
 	configData, err := config.Load()
 	if err != nil {
