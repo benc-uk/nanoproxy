@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"log"
 	"os"
 
@@ -34,15 +33,8 @@ type Rule struct {
 
 var configPath = "./config.yaml"
 
-// Setup handles the command line arguments and CONF_FILE env var
-// Sets the global configPath variable
-func Setup() {
-	log.Println("************************** Setting up config")
-	// Config file path can be set with -c or --config or CONF_FILE env var
-	flag.StringVar(&configPath, "config", "./config.yaml", "Path to config file")
-	flag.StringVar(&configPath, "c", "./config.yaml", "Path to config file")
-	flag.Parse()
-
+// Sets the global configPath variable from CONF_FILE env var
+func init() {
 	confPathEnv := os.Getenv("CONF_FILE")
 	if confPathEnv != "" {
 		configPath = confPathEnv

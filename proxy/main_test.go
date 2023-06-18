@@ -52,6 +52,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestNoConfRoot404(t *testing.T) {
+	// No config applied
+	nanoProxy.applyConfig(nil, timeout)
+
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
@@ -74,7 +77,7 @@ func TestDebugConfDump200(t *testing.T) {
 }
 
 func TestProxyPath200(t *testing.T) {
-	nanoProxy.processConfig(simpleConf, timeout)
+	nanoProxy.applyConfig(&simpleConf, timeout)
 
 	request, _ := http.NewRequest(http.MethodGet, "/api", nil)
 	response := httptest.NewRecorder()
@@ -87,7 +90,7 @@ func TestProxyPath200(t *testing.T) {
 }
 
 func TestProxyPath404(t *testing.T) {
-	nanoProxy.processConfig(simpleConf, timeout)
+	nanoProxy.applyConfig(&simpleConf, timeout)
 
 	request, _ := http.NewRequest(http.MethodGet, "/cake", nil)
 	response := httptest.NewRecorder()
@@ -100,7 +103,7 @@ func TestProxyPath404(t *testing.T) {
 }
 
 func TestProxyPathNoStrip404(t *testing.T) {
-	nanoProxy.processConfig(simpleConf, timeout)
+	nanoProxy.applyConfig(&simpleConf, timeout)
 
 	request, _ := http.NewRequest(http.MethodGet, "/nostrip", nil)
 	response := httptest.NewRecorder()
@@ -113,7 +116,7 @@ func TestProxyPathNoStrip404(t *testing.T) {
 }
 
 func TestProxyPathBadUpstream502(t *testing.T) {
-	nanoProxy.processConfig(simpleConf, timeout)
+	nanoProxy.applyConfig(&simpleConf, timeout)
 
 	request, _ := http.NewRequest(http.MethodGet, "/badupstream", nil)
 	response := httptest.NewRecorder()

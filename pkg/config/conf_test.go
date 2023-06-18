@@ -28,7 +28,7 @@ rules:
 
 func TestMain(m *testing.M) {
 	os.Setenv("CONF_FILE", "/tmp/nanoproxy-config.yaml")
-	Setup()
+	//Setup()
 
 	m.Run()
 
