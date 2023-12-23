@@ -127,7 +127,12 @@ func (np *NanoProxy) applyConfig(conf *config.Config, timeout time.Duration) {
 			u.Port = 443
 		}
 
-		revProxy, err := NewReverseProxy(scheme+"://"+u.Host+":"+strconv.Itoa(u.Port), timeout)
+		hostRewrite := true
+		if u.NoHostRewrite {
+			hostRewrite = false
+		}
+
+		revProxy, err := NewReverseProxy(scheme+"://"+u.Host+":"+strconv.Itoa(u.Port), timeout, hostRewrite)
 		if err != nil {
 			log.Fatalf("Error with reverse proxy: %v", err)
 			continue
@@ -214,6 +219,8 @@ func (np *NanoProxy) mainHandler(w http.ResponseWriter, r *http.Request) {
 			if rule.StripPath {
 				r.URL.Path = strings.Replace(r.URL.Path, rule.Path, "", 1)
 			}
+
+			//r.Header.Set("Host", "frontend")
 
 			// It all comes down to this, proxy the request
 			proxy.ServeHTTP(w, r)

@@ -112,16 +112,17 @@ with `-config` or `-c` argument when starting the proxy.
 ### Upstream
 
 ```yaml
-name: Name
-host: Hostname or IP
+name: Name (required)
+host: Hostname or IP (required)
 port: Port number, defaults to 80 or 443 when scheme is https
 scheme: Scheme 'http' or 'https', if omitted defaults to 'http'
+noHostRewrite: Disable host header preservation, default is 'false'
 ```
 
 ### Rule
 
 ```yaml
-upstream: Name of the upstream to send traffic to
+upstream: Name of the upstream to send traffic to (required)
 path: URL path in request to match against
 host: Host in request to match against. If omitted, will match all hosts
 matchMode: How to match the path, 'prefix' or 'exact', defaults to 'prefix'
@@ -158,6 +159,7 @@ rules:
 | `DEBUG`           | For extra logging and output from the proxy, set to non-blank value (e.g. "1"). Also enables the special config endpoint (see below).          | _None_  |
 | `CERT_PATH`       | Set to a directory where `cert.pem` and `key.pem` reside, this will enable TLS and HTTPS on the proxy server.                                  | _None_  |
 | `TLS_SKIP_VERIFY` | Used when calling a HTTPS upstream, if this var is set to anything (e.g. "1") this will skip the normal TLS cert validation for all upstreams. | _None_  |
+| `CONFIG_B64`      | Config file in Base64 encoded format, if set will this be decoded be written over config file at startup.                                      | _None_  |
 
 ## 🤖 Notes on proxy
 

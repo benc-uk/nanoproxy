@@ -6,6 +6,7 @@
 package main
 
 import (
+	b64 "encoding/base64"
 	"log"
 	"os"
 	"strconv"
@@ -40,6 +41,25 @@ func main() {
 		}
 
 		timeout = time.Duration(t) * time.Second
+	}
+
+	if os.Getenv("CONFIG_B64") != "" {
+		confBase64 := os.Getenv("CONFIG_B64")
+		log.Printf("Config provided from env variable")
+
+		// Decode as Base64
+		confBytes, err := b64.StdEncoding.DecodeString(confBase64)
+		if err != nil {
+			log.Fatalf("Error decoding base64 config: %v", err)
+		}
+
+		// Write decoded config to the config file
+		err = os.WriteFile(config.GetPath(), confBytes, 0600)
+		if err != nil {
+			log.Fatalf("Error writing config file: %v", err)
+		}
+
+		log.Printf("Env var config file written to: %s", config.GetPath())
 	}
 
 	nanoProxy := &NanoProxy{}

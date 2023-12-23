@@ -16,10 +16,11 @@ type Config struct {
 
 // Upstream is a backend server
 type Upstream struct {
-	Name   string `yaml:"name"`
-	Host   string `yaml:"host"`
-	Port   int    `yaml:"port"`
-	Scheme string `yaml:"scheme"`
+	Name          string `yaml:"name"`
+	Host          string `yaml:"host"`
+	Port          int    `yaml:"port"`
+	Scheme        string `yaml:"scheme"`
+	NoHostRewrite bool   `yaml:"noHostRewrite"`
 }
 
 // Rule sets host and/or path to match and the upstream to use

@@ -23,7 +23,7 @@ const (
 var hostname string
 
 // Builds a httputil.ReverseProxy based on a target URL and timeout
-func NewReverseProxy(targetURL string, timeout time.Duration) (*httputil.ReverseProxy, error) {
+func NewReverseProxy(targetURL string, timeout time.Duration, hostRewrite bool) (*httputil.ReverseProxy, error) {
 	log.Printf("Creating upstream: %v\n", targetURL)
 
 	incomingURL, err := url.Parse(targetURL)
@@ -54,7 +54,7 @@ func NewReverseProxy(targetURL string, timeout time.Duration) (*httputil.Reverse
 
 	// Hook in our own request/response modifiers
 	proxy.Director = nil
-	proxy.Rewrite = modifyRequest(incomingURL)
+	proxy.Rewrite = modifyRequest(incomingURL, hostRewrite)
 	proxy.ModifyResponse = modifyResponse()
 
 	// get hostname of where we are running
@@ -78,7 +78,7 @@ func modifyResponse() func(*http.Response) error {
 }
 
 // Setup the request to be sent to the upstream server
-func modifyRequest(url *url.URL) func(*httputil.ProxyRequest) {
+func modifyRequest(url *url.URL, hostRewrite bool) func(*httputil.ProxyRequest) {
 	return func(proxyReq *httputil.ProxyRequest) {
 		// Setting X-Forwarded-For and X-Forwarded-Host headers seems polite
 		proxyReq.SetXForwarded()
@@ -86,7 +86,11 @@ func modifyRequest(url *url.URL) func(*httputil.ProxyRequest) {
 		// Set the URL to the upstream server
 		proxyReq.SetURL(url)
 
+		log.Printf("!!! hostRewrite is : %v\n", hostRewrite)
+
 		// IMPORTANT: Preserve the original host header
-		proxyReq.Out.Host = proxyReq.In.Host
+		if hostRewrite {
+			proxyReq.Out.Host = proxyReq.In.Host
+		}
 	}
 }
