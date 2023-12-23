@@ -45,6 +45,7 @@ func main() {
 
 	if os.Getenv("CONFIG_B64") != "" {
 		confBase64 := os.Getenv("CONFIG_B64")
+
 		log.Printf("Config provided from env variable")
 
 		// Decode as Base64
