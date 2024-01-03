@@ -86,8 +86,6 @@ func modifyRequest(url *url.URL, hostRewrite bool) func(*httputil.ProxyRequest) 
 		// Set the URL to the upstream server
 		proxyReq.SetURL(url)
 
-		log.Printf("!!! hostRewrite is : %v\n", hostRewrite)
-
 		// IMPORTANT: Preserve the original host header
 		if hostRewrite {
 			proxyReq.Out.Host = proxyReq.In.Host
