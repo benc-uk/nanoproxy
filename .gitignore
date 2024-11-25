@@ -3,7 +3,7 @@ bin/
 tmp/
 !*.sample
 !/samples/**
-config.yaml
+**/config.yaml
 myvalues.yaml
 .env
 .env.*
