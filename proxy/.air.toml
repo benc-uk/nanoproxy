@@ -2,13 +2,13 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-  bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ./proxy"
-  exclude_dir = ["bin", "tmp", "build", "deploy"]
-  include_dir = []
-  include_ext = ["go"]
-  delay = 500
-  kill_delay = 10
+bin = "./tmp/main"
+cmd = "go build -o ./tmp/main ./proxy"
+exclude_dir = []
+include_dir = ["pkg", "proxy", "controller"]
+include_ext = ["go"]
+delay = 500
+kill_delay = 10
 
 [misc]
-  clean_on_exit = true
+clean_on_exit = true
