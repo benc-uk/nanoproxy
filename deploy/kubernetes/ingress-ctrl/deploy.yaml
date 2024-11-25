@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nanoproxy
+  namespace: nanoproxy
 spec:
   selector:
     matchLabels:
@@ -14,13 +15,13 @@ spec:
       serviceAccount: nanoproxy
       containers:
         - name: proxy
-          image: ghcr.io/benc-uk/nanoproxy-proxy:latest
+          image: ghcr.io/benc-uk/nanoproxy-proxy:dev
           imagePullPolicy: Always
           env:
             - name: CONF_FILE
               value: /conf/config.yaml
             - name: DEBUG
-              value: "true"
+              value: "true" # Probably disable/remove outside of testing
           resources:
             limits:
               memory: "256M"
@@ -34,7 +35,7 @@ spec:
               name: conf-volume
 
         - name: controller
-          image: ghcr.io/benc-uk/nanoproxy-controller:latest
+          image: ghcr.io/benc-uk/nanoproxy-controller:dev
           imagePullPolicy: Always
           env:
             - name: CONF_FILE
