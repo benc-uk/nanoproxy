@@ -43,7 +43,7 @@ jobs:
         uses: robherley/go-test-action@v0.5.0
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
           path: output/coverage.html
