@@ -113,8 +113,8 @@ func main() {
 	}()
 
 	log.Println("Watching config file: " + config.GetPath())
-	err = watcher.Add(config.GetPath())
 
+	err = watcher.Add(config.GetPath())
 	if err != nil {
 		if os.IsNotExist(err) {
 			// Try to create config file and watch it
