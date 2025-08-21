@@ -44,13 +44,13 @@ func (np *NanoProxy) startServer(port string, timeout time.Duration, certPath st
 
 		// Check cert & key files exist
 		if _, err := os.Stat(certPath + "/cert.pem"); os.IsNotExist(err) {
-			log.Printf("ERROR! Cert file not found: " + certPath + "/cert.pem")
+			log.Printf("ERROR! Cert file not found: %s/cert.pem", certPath)
 
 			useTLS = false
 		}
 
 		if _, err := os.Stat(certPath + "/key.pem"); os.IsNotExist(err) {
-			log.Printf("ERROR! Key file not found: " + certPath + "/key.pem")
+			log.Printf("ERROR! Key file not found: %s/key.pem", certPath)
 
 			useTLS = false
 		}
@@ -143,7 +143,7 @@ func (np *NanoProxy) applyConfig(conf *config.Config, timeout time.Duration) {
 
 	// Validate & check rules
 	for _, rule := range conf.Rules {
-		if !(rule.MatchMode == "" || rule.MatchMode == "prefix" || rule.MatchMode == "exact") {
+		if rule.MatchMode != "" && rule.MatchMode != "prefix" && rule.MatchMode != "exact" {
 			log.Printf("Rule error: invalid match mode: %s", rule.MatchMode)
 			continue
 		}

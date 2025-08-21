@@ -17,6 +17,9 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 var (
@@ -49,16 +52,19 @@ func main() {
 
 	port, _ := strconv.Atoi(portString)
 
+	server := webhook.NewServer(webhook.Options{
+		// I'm not convinced this actually works
+		Port: port,
+	})
+
 	options := ctrl.Options{
-		Port:   port,
-		Scheme: scheme,
-
-		// Disable health probes and metrics
-		MetricsBindAddress:     "0",
-		HealthProbeBindAddress: "",
-
-		// Running as a sidecar in a pod, disable leader election
-		LeaderElection: false,
+		Scheme:                 scheme,
+		HealthProbeBindAddress: "", // Disable health probe
+		WebhookServer:          server,
+		LeaderElection:         false,
+		Metrics: metricsserver.Options{
+			BindAddress: "0", // Disable metrics
+		},
 	}
 
 	// The manager will setup the controller, handle elections

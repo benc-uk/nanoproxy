@@ -42,8 +42,8 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// Fetch ingress
 	var ingress netv1.Ingress
-	err := r.Get(ctx, req.NamespacedName, &ingress)
 
+	err := r.Get(ctx, req.NamespacedName, &ingress)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			if ingressCache[key] != nil {

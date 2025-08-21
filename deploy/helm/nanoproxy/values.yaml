@@ -47,13 +47,11 @@ serviceAccount:
 podAnnotations: {}
 
 # -- Security context for the pods
-podSecurityContext:
-  {}
+podSecurityContext: {}
   # fsGroup: 2000
 
 # -- Security context for the containers
-securityContext:
-  {}
+securityContext: {}
   # capabilities:
   #   drop:
   #   - ALL
