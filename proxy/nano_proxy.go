@@ -143,7 +143,7 @@ func (np *NanoProxy) applyConfig(conf *config.Config, timeout time.Duration) {
 
 	// Validate & check rules
 	for _, rule := range conf.Rules {
-		if !(rule.MatchMode == "" || rule.MatchMode == "prefix" || rule.MatchMode == "exact") {
+		if rule.MatchMode != "" && rule.MatchMode != "prefix" && rule.MatchMode != "exact" {
 			log.Printf("Rule error: invalid match mode: %s", rule.MatchMode)
 			continue
 		}
